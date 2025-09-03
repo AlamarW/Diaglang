@@ -205,6 +205,48 @@ class TestDiagReader(unittest.TestCase):
             if os.path.exists(test_file):
                 os.remove(test_file)
 
+    def test_circle_handles_short_label(self):
+        test_file = "test_short_circle.diag"
+        with open(test_file, "w") as f:
+            f.write("Circle(A)")
+        
+        try:
+            reader = DiagReader()
+            ascii_art = reader.render_ascii(test_file)
+            expected = "(A)"
+            self.assertEqual(ascii_art, expected)
+        finally:
+            if os.path.exists(test_file):
+                os.remove(test_file)
+
+    def test_circle_handles_long_label(self):
+        test_file = "test_long_circle.diag"
+        with open(test_file, "w") as f:
+            f.write("Circle(VeryLongLabel)")
+        
+        try:
+            reader = DiagReader()
+            ascii_art = reader.render_ascii(test_file)
+            expected = "(VeryLongLabel)"
+            self.assertEqual(ascii_art, expected)
+        finally:
+            if os.path.exists(test_file):
+                os.remove(test_file)
+
+    def test_circle_handles_empty_label(self):
+        test_file = "test_empty_circle.diag"
+        with open(test_file, "w") as f:
+            f.write("Circle()")
+        
+        try:
+            reader = DiagReader()
+            ascii_art = reader.render_ascii(test_file)
+            expected = "()"
+            self.assertEqual(ascii_art, expected)
+        finally:
+            if os.path.exists(test_file):
+                os.remove(test_file)
+
 
 if __name__ == "__main__":
     unittest.main()

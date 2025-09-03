@@ -25,7 +25,7 @@ class DiagReader:
                     return f"┌───┐\n│ {label} │\n└───┘"
                 return "┌───┐\n│   │\n└───┘"
             elif shape_type == "circle":
-                if label:
+                if label is not None:
                     return f"({label})"
                 return " ○ "
             elif shape_type == "triangle":
