@@ -37,3 +37,15 @@ class DiagReader:
                     return f"┌─────┐\n│{label}│\n└─────┘"
                 return "┌─────┐\n│     │\n└─────┘"
         return ""
+
+
+if __name__ == "__main__":
+    import sys
+    if len(sys.argv) != 2:
+        print("Usage: python diaglang.py <filename>")
+        sys.exit(1)
+    
+    filename = sys.argv[1]
+    reader = DiagReader()
+    result = reader.render_ascii(filename)
+    print(result)

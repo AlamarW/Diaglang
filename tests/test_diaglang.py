@@ -147,6 +147,22 @@ class TestDiagReader(unittest.TestCase):
             if os.path.exists(test_file):
                 os.remove(test_file)
 
+    def test_cli_can_render_diag_file(self):
+        import subprocess
+        test_file = "test_cli.diag"
+        with open(test_file, "w") as f:
+            f.write("Square(CLI)")
+        
+        try:
+            result = subprocess.run(["python3", "src/diaglang.py", test_file], 
+                                  capture_output=True, text=True)
+            expected = "┌───┐\n│ CLI │\n└───┘"
+            self.assertEqual(result.stdout.strip(), expected)
+            self.assertEqual(result.returncode, 0)
+        finally:
+            if os.path.exists(test_file):
+                os.remove(test_file)
+
 
 if __name__ == "__main__":
     unittest.main()
