@@ -91,6 +91,62 @@ class TestDiagReader(unittest.TestCase):
             if os.path.exists(test_file):
                 os.remove(test_file)
 
+    def test_can_render_labeled_rectangle(self):
+        test_file = "test_labeled_rect.diag"
+        with open(test_file, "w") as f:
+            f.write("Rectangle(Node1)")
+        
+        try:
+            reader = DiagReader()
+            ascii_art = reader.render_ascii(test_file)
+            expected = "┌─────┐\n│Node1│\n└─────┘"
+            self.assertEqual(ascii_art, expected)
+        finally:
+            if os.path.exists(test_file):
+                os.remove(test_file)
+
+    def test_can_render_labeled_square(self):
+        test_file = "test_labeled_square.diag"
+        with open(test_file, "w") as f:
+            f.write("Square(A)")
+        
+        try:
+            reader = DiagReader()
+            ascii_art = reader.render_ascii(test_file)
+            expected = "┌───┐\n│ A │\n└───┘"
+            self.assertEqual(ascii_art, expected)
+        finally:
+            if os.path.exists(test_file):
+                os.remove(test_file)
+
+    def test_can_render_labeled_circle(self):
+        test_file = "test_labeled_circle.diag"
+        with open(test_file, "w") as f:
+            f.write("Circle(X)")
+        
+        try:
+            reader = DiagReader()
+            ascii_art = reader.render_ascii(test_file)
+            expected = "(X)"
+            self.assertEqual(ascii_art, expected)
+        finally:
+            if os.path.exists(test_file):
+                os.remove(test_file)
+
+    def test_can_render_labeled_triangle(self):
+        test_file = "test_labeled_triangle.diag"
+        with open(test_file, "w") as f:
+            f.write("Triangle(T)")
+        
+        try:
+            reader = DiagReader()
+            ascii_art = reader.render_ascii(test_file)
+            expected = " /\\ \n/T \\"
+            self.assertEqual(ascii_art, expected)
+        finally:
+            if os.path.exists(test_file):
+                os.remove(test_file)
+
 
 if __name__ == "__main__":
     unittest.main()

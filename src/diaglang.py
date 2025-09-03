@@ -10,13 +10,30 @@ class DiagReader:
     def render_ascii(self, filename):
         shapes = self.parse_shapes(filename)
         if shapes:
-            shape = shapes[0]
-            if shape == "square":
+            shape_input = shapes[0]
+            
+            # Parse shape and label
+            if '(' in shape_input and shape_input.endswith(')'):
+                shape_type = shape_input.split('(')[0].lower()
+                label = shape_input.split('(')[1][:-1]
+            else:
+                shape_type = shape_input.lower()
+                label = None
+            
+            if shape_type == "square":
+                if label:
+                    return f"┌───┐\n│ {label} │\n└───┘"
                 return "┌───┐\n│   │\n└───┘"
-            elif shape == "circle":
+            elif shape_type == "circle":
+                if label:
+                    return f"({label})"
                 return " ○ "
-            elif shape == "triangle":
+            elif shape_type == "triangle":
+                if label:
+                    return f" /\\ \n/{label} \\"
                 return " /\\ \n/__\\"
-            elif shape == "rectangle":
+            elif shape_type == "rectangle":
+                if label:
+                    return f"┌─────┐\n│{label}│\n└─────┘"
                 return "┌─────┐\n│     │\n└─────┘"
         return ""
