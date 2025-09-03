@@ -27,11 +27,21 @@ class DiagReader:
             elif shape_type == "circle" or shape_type == "cirle":
                 if label is not None:
                     if label == "":
-                        return " ╭──╮ \n│  │\n ╰──╯ "
-                    width = len(label)
-                    border = "─" * width
-                    return f" ╭{border}╮ \n│{label}│\n ╰{border}╯ "
-                return " ╭──╮ \n│  │\n ╰──╯ "
+                        return "  ____  \n /    \\ \n|      |\n \\____/ "
+                    # Create proper oval shape  
+                    label_len = len(label)
+                    width = max(6, label_len + 2)
+                    padding_total = width - label_len
+                    pad_left = " " * (padding_total // 2)
+                    pad_right = " " * (padding_total // 2)
+                    # If odd padding, add extra space to right
+                    if padding_total % 2 == 1:
+                        pad_right += " "
+                    underline = "_" * width
+                    spaces = " " * width
+                    
+                    return f"  {underline}  \n /{spaces}\\ \n|{pad_left}{label}{pad_right}|\n \\{underline}/ "
+                return "  ____  \n /    \\ \n|      |\n \\____/ "
             elif shape_type == "triangle":
                 if label:
                     return f" /\\ \n/{label} \\"
