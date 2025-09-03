@@ -22,6 +22,19 @@ class TestDiagReader(unittest.TestCase):
             if os.path.exists(test_file):
                 os.remove(test_file)
 
+    def test_can_handle_primitive_shapes(self):
+        test_file = "test_shapes.diag"
+        with open(test_file, "w") as f:
+            f.write("square\ncircle\ntriangle\nrectangle")
+        
+        try:
+            reader = DiagReader()
+            shapes = reader.parse_shapes(test_file)
+            self.assertEqual(shapes, ["square", "circle", "triangle", "rectangle"])
+        finally:
+            if os.path.exists(test_file):
+                os.remove(test_file)
+
 
 if __name__ == "__main__":
     unittest.main()
