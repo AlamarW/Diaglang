@@ -49,6 +49,48 @@ class TestDiagReader(unittest.TestCase):
             if os.path.exists(test_file):
                 os.remove(test_file)
 
+    def test_can_render_circle_as_ascii_art(self):
+        test_file = "test_circle.diag"
+        with open(test_file, "w") as f:
+            f.write("circle")
+        
+        try:
+            reader = DiagReader()
+            ascii_art = reader.render_ascii(test_file)
+            expected = " ○ "
+            self.assertEqual(ascii_art, expected)
+        finally:
+            if os.path.exists(test_file):
+                os.remove(test_file)
+
+    def test_can_render_triangle_as_ascii_art(self):
+        test_file = "test_triangle.diag"
+        with open(test_file, "w") as f:
+            f.write("triangle")
+        
+        try:
+            reader = DiagReader()
+            ascii_art = reader.render_ascii(test_file)
+            expected = " /\\ \n/__\\"
+            self.assertEqual(ascii_art, expected)
+        finally:
+            if os.path.exists(test_file):
+                os.remove(test_file)
+
+    def test_can_render_rectangle_as_ascii_art(self):
+        test_file = "test_rectangle.diag"
+        with open(test_file, "w") as f:
+            f.write("rectangle")
+        
+        try:
+            reader = DiagReader()
+            ascii_art = reader.render_ascii(test_file)
+            expected = "┌─────┐\n│     │\n└─────┘"
+            self.assertEqual(ascii_art, expected)
+        finally:
+            if os.path.exists(test_file):
+                os.remove(test_file)
+
 
 if __name__ == "__main__":
     unittest.main()

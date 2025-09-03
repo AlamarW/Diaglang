@@ -9,6 +9,14 @@ class DiagReader:
     
     def render_ascii(self, filename):
         shapes = self.parse_shapes(filename)
-        if shapes and shapes[0] == "square":
-            return "┌───┐\n│   │\n└───┘"
+        if shapes:
+            shape = shapes[0]
+            if shape == "square":
+                return "┌───┐\n│   │\n└───┘"
+            elif shape == "circle":
+                return " ○ "
+            elif shape == "triangle":
+                return " /\\ \n/__\\"
+            elif shape == "rectangle":
+                return "┌─────┐\n│     │\n└─────┘"
         return ""
