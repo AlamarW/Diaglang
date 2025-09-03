@@ -33,8 +33,12 @@ class DiagReader:
                     return f" /\\ \n/{label} \\"
                 return " /\\ \n/__\\"
             elif shape_type == "rectangle":
-                if label:
-                    return f"┌─────┐\n│{label}│\n└─────┘"
+                if label is not None:
+                    if label == "":
+                        return "┌──┐\n│  │\n└──┘"
+                    width = len(label) + 2  # padding on both sides
+                    border = "─" * width
+                    return f"┌{border}┐\n│ {label} │\n└{border}┘"
                 return "┌─────┐\n│     │\n└─────┘"
         return ""
 

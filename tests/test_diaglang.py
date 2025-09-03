@@ -99,7 +99,7 @@ class TestDiagReader(unittest.TestCase):
         try:
             reader = DiagReader()
             ascii_art = reader.render_ascii(test_file)
-            expected = "┌─────┐\n│Node1│\n└─────┘"
+            expected = "┌───────┐\n│ Node1 │\n└───────┘"
             self.assertEqual(ascii_art, expected)
         finally:
             if os.path.exists(test_file):
@@ -159,6 +159,48 @@ class TestDiagReader(unittest.TestCase):
             expected = "┌───┐\n│ CLI │\n└───┘"
             self.assertEqual(result.stdout.strip(), expected)
             self.assertEqual(result.returncode, 0)
+        finally:
+            if os.path.exists(test_file):
+                os.remove(test_file)
+
+    def test_rectangle_handles_short_label(self):
+        test_file = "test_short_rect.diag"
+        with open(test_file, "w") as f:
+            f.write("Rectangle(A)")
+        
+        try:
+            reader = DiagReader()
+            ascii_art = reader.render_ascii(test_file)
+            expected = "┌───┐\n│ A │\n└───┘"
+            self.assertEqual(ascii_art, expected)
+        finally:
+            if os.path.exists(test_file):
+                os.remove(test_file)
+
+    def test_rectangle_handles_long_label(self):
+        test_file = "test_long_rect.diag"
+        with open(test_file, "w") as f:
+            f.write("Rectangle(VeryLongLabel)")
+        
+        try:
+            reader = DiagReader()
+            ascii_art = reader.render_ascii(test_file)
+            expected = "┌───────────────┐\n│ VeryLongLabel │\n└───────────────┘"
+            self.assertEqual(ascii_art, expected)
+        finally:
+            if os.path.exists(test_file):
+                os.remove(test_file)
+
+    def test_rectangle_handles_empty_label(self):
+        test_file = "test_empty_rect.diag"
+        with open(test_file, "w") as f:
+            f.write("Rectangle()")
+        
+        try:
+            reader = DiagReader()
+            ascii_art = reader.render_ascii(test_file)
+            expected = "┌──┐\n│  │\n└──┘"
+            self.assertEqual(ascii_art, expected)
         finally:
             if os.path.exists(test_file):
                 os.remove(test_file)
