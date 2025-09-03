@@ -35,6 +35,20 @@ class TestDiagReader(unittest.TestCase):
             if os.path.exists(test_file):
                 os.remove(test_file)
 
+    def test_can_render_square_as_ascii_art(self):
+        test_file = "test_square.diag"
+        with open(test_file, "w") as f:
+            f.write("square")
+        
+        try:
+            reader = DiagReader()
+            ascii_art = reader.render_ascii(test_file)
+            expected = "┌───┐\n│   │\n└───┘"
+            self.assertEqual(ascii_art, expected)
+        finally:
+            if os.path.exists(test_file):
+                os.remove(test_file)
+
 
 if __name__ == "__main__":
     unittest.main()
