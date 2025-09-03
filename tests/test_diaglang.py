@@ -247,6 +247,34 @@ class TestDiagReader(unittest.TestCase):
             if os.path.exists(test_file):
                 os.remove(test_file)
 
+    def test_circle_handles_case_insensitive(self):
+        test_file = "test_case_circle.diag"
+        with open(test_file, "w") as f:
+            f.write("CIRCLE(Test)")
+        
+        try:
+            reader = DiagReader()
+            ascii_art = reader.render_ascii(test_file)
+            expected = "(Test)"
+            self.assertEqual(ascii_art, expected)
+        finally:
+            if os.path.exists(test_file):
+                os.remove(test_file)
+
+    def test_circle_handles_typo_cirle(self):
+        test_file = "test_typo_circle.diag"
+        with open(test_file, "w") as f:
+            f.write("Cirle(Testing for length)")
+        
+        try:
+            reader = DiagReader()
+            ascii_art = reader.render_ascii(test_file)
+            expected = "(Testing for length)"
+            self.assertEqual(ascii_art, expected)
+        finally:
+            if os.path.exists(test_file):
+                os.remove(test_file)
+
 
 if __name__ == "__main__":
     unittest.main()
