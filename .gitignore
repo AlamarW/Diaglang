@@ -1,0 +1,34 @@
+# Python cache files
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyc
+*.pyo
+*.pyd
+.Python
+
+# Development files
+plan.md
+
+# Temporary test files (keep tests/test_files/ as they are part of the test suite)
+/test_*.diag
+/tests/temp_*.diag
+test_debug.diag
+test_check.diag
+test_circle_c.diag
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Virtual environments
+venv/
+env/
+ENV/
