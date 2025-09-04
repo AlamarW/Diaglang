@@ -44,6 +44,17 @@ class DiagReader:
                     return "   /\\   \n  /  \\  \n /    \\ \n/______\\"
                 # Create proper triangle shape that scales with label
                 label_len = len(label)
+                
+                # For very small labels (1-3 chars), use minimal triangle
+                if label_len <= 3:
+                    if label_len == 1:
+                        return f"  /\\\n /{label} \\\n/____\\"
+                    elif label_len == 2:
+                        return f"  /\\\n /{label}\\\n/____\\"
+                    else:  # label_len == 3
+                        return f"  /\\\n /{label}\\\n/_____\\"
+                
+                # For longer labels, use the scaling algorithm
                 # Calculate how many rows we need based on label length
                 min_rows = 4  # minimum: top, middle, label, base
                 extra_rows = max(0, (label_len - 4) // 2)  # add rows for longer labels

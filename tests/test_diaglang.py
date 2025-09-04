@@ -141,7 +141,7 @@ class TestDiagReader(unittest.TestCase):
         try:
             reader = DiagReader()
             ascii_art = reader.render_ascii(test_file)
-            expected = "   /\\\n  /  \\\n /T\\\n/___\\"
+            expected = "  /\\\n /T \\\n/____\\"
             self.assertEqual(ascii_art, expected)
         finally:
             if os.path.exists(test_file):
@@ -298,7 +298,49 @@ class TestDiagReader(unittest.TestCase):
         try:
             reader = DiagReader()
             ascii_art = reader.render_ascii(test_file)
-            expected = "┌───────┐         /\\\n│ Start │──────  /  \\\n└───────┘       /End\\\n               /_____\\"
+            expected = "┌───────┐        /\\\n│ Start │────── /End\\\n└───────┘      /_____\\"
+            self.assertEqual(ascii_art, expected)
+        finally:
+            if os.path.exists(test_file):
+                os.remove(test_file)
+
+    def test_triangle_handles_very_small_labels(self):
+        test_file = "test_small_triangle.diag"
+        with open(test_file, "w") as f:
+            f.write("Triangle(a)")
+        
+        try:
+            reader = DiagReader()
+            ascii_art = reader.render_ascii(test_file)
+            expected = "  /\\\n /a \\\n/____\\"
+            self.assertEqual(ascii_art, expected)
+        finally:
+            if os.path.exists(test_file):
+                os.remove(test_file)
+
+    def test_triangle_handles_two_char_labels(self):
+        test_file = "test_two_char_triangle.diag"
+        with open(test_file, "w") as f:
+            f.write("Triangle(ab)")
+        
+        try:
+            reader = DiagReader()
+            ascii_art = reader.render_ascii(test_file)
+            expected = "  /\\\n /ab\\\n/____\\"
+            self.assertEqual(ascii_art, expected)
+        finally:
+            if os.path.exists(test_file):
+                os.remove(test_file)
+
+    def test_triangle_handles_three_char_labels(self):
+        test_file = "test_three_char_triangle.diag"
+        with open(test_file, "w") as f:
+            f.write("Triangle(abc)")
+        
+        try:
+            reader = DiagReader()
+            ascii_art = reader.render_ascii(test_file)
+            expected = "  /\\\n /abc\\\n/_____\\"
             self.assertEqual(ascii_art, expected)
         finally:
             if os.path.exists(test_file):
@@ -340,7 +382,7 @@ class TestDiagReader(unittest.TestCase):
         try:
             reader = DiagReader()
             ascii_art = reader.render_ascii(test_file)
-            expected = "   /\\\n  /  \\\n /A\\\n/___\\"
+            expected = "  /\\\n /A \\\n/____\\"
             self.assertEqual(ascii_art, expected)
         finally:
             if os.path.exists(test_file):
