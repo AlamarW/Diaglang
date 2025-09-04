@@ -284,7 +284,7 @@ class TestDiagReader(unittest.TestCase):
         try:
             reader = DiagReader()
             ascii_art = reader.render_ascii(test_file)
-            expected = "┌───────┐\n│ Node1 │\n└───┬───┘\n    │\n    │\n   /│\\\n  / │\\\n /Node2\\\n/_______\\"
+            expected = "┌───────┐\n│ Node1 │\n└───┬───┘\n    │\n    │\n   /\\\n  /  \\\n /Node2\\\n/_______\\"
             self.assertEqual(ascii_art, expected)
         finally:
             if os.path.exists(test_file):

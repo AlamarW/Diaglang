@@ -129,31 +129,14 @@ class DiagReader:
         # Create connecting lines
         connection_lines = ['    │', '    │']
         
-        # Modify the to shape to have a connection point at the top middle
+        # Modify the to shape to have a connection point at the top edge
         modified_to = to_lines.copy()
         if len(modified_to) > 0 and modified_to[0].strip():
-            # For triangle, add connection to the top point and modify second line
+            # For triangle, the connection should terminate at the top point, not go through
             if '/' in modified_to[0] and '\\' in modified_to[0]:
-                # Modify the top line to have connection - replace the space between / and \ with │
-                top_line = modified_to[0]
-                slash_pos = top_line.find('/')
-                backslash_pos = top_line.find('\\')
-                if slash_pos != -1 and backslash_pos != -1:
-                    # Replace everything between / and \ with │
-                    modified_to[0] = top_line[:slash_pos+1] + '│' + top_line[backslash_pos:]
-                
-                # Also modify the second line to show the connection continuing down
-                if len(modified_to) > 1:
-                    second_line = modified_to[1]
-                    if '/' in second_line and '\\' in second_line:
-                        slash_pos = second_line.find('/')
-                        backslash_pos = second_line.find('\\')
-                        if slash_pos != -1 and backslash_pos != -1:
-                            # Add connection line in middle while preserving spaces
-                            mid_spaces = second_line[slash_pos+1:backslash_pos]
-                            mid_pos = len(mid_spaces) // 2
-                            new_middle = mid_spaces[:mid_pos] + '│' + mid_spaces[mid_pos+1:]
-                            modified_to[1] = second_line[:slash_pos+1] + new_middle + second_line[backslash_pos:]
+                # The connection line should end right at the triangle's top point
+                # Don't modify the triangle itself - it should remain intact
+                pass
         
         # Combine all parts
         result_lines = modified_from + connection_lines + modified_to

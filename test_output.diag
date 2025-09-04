@@ -1,3 +1,4 @@
 Circle(Testing mctest)
 Triangle(Test)
 Square(Test)
+Rectangle(Node1) connects to Triangle(Node2)
