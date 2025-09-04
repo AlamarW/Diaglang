@@ -156,7 +156,7 @@ class TestDiagReader(unittest.TestCase):
         try:
             result = subprocess.run(["python3", "src/diaglang.py", test_file], 
                                   capture_output=True, text=True)
-            expected = "┌───┐\n│ CLI │\n└───┘"
+            expected = "┌─────┐\n│ CLI │\n└─────┘"
             self.assertEqual(result.stdout.strip(), expected)
             self.assertEqual(result.returncode, 0)
         finally:
@@ -261,6 +261,20 @@ class TestDiagReader(unittest.TestCase):
             if os.path.exists(test_file):
                 os.remove(test_file)
 
+
+    def test_can_render_multiple_shapes(self):
+        test_file = "test_multiple.diag"
+        with open(test_file, "w") as f:
+            f.write("Circle(Testing mctest)\nTriangle(Test)\nSquare(Test)")
+        
+        try:
+            reader = DiagReader()
+            ascii_art = reader.render_ascii(test_file)
+            expected = "  ________________  \n /                \\ \n|  Testing mctest  |\n \\________________/ \n\n   /\\\n  /  \\\n /Test\\\n/______\\\n\n┌──────┐\n│ Test │\n└──────┘"
+            self.assertEqual(ascii_art, expected)
+        finally:
+            if os.path.exists(test_file):
+                os.remove(test_file)
 
     def test_circle_renders_as_oval_shape(self):
         test_file = "test_oval_circle.diag"
