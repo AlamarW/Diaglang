@@ -346,6 +346,34 @@ class TestDiagReader(unittest.TestCase):
             if os.path.exists(test_file):
                 os.remove(test_file)
 
+    def test_can_connect_nodes_with_label(self):
+        test_file = "test_labeled_connection.diag"
+        with open(test_file, "w") as f:
+            f.write("Rectangle(Start) connects to(uses) Triangle(End)")
+        
+        try:
+            reader = DiagReader()
+            ascii_art = reader.render_ascii(test_file)
+            expected = "┌───────┐\n│ Start │\n└───┬───┘\n    │\nuses\n    │\n  /\\\n /End\\\n/_____\\"
+            self.assertEqual(ascii_art, expected)
+        finally:
+            if os.path.exists(test_file):
+                os.remove(test_file)
+
+    def test_can_connect_nodes_with_horizontal_label(self):
+        test_file = "test_horizontal_labeled_connection.diag"
+        with open(test_file, "w") as f:
+            f.write("Rectangle(Start) connects to(uses) horizontal Triangle(End)")
+        
+        try:
+            reader = DiagReader()
+            ascii_art = reader.render_ascii(test_file)
+            expected = "┌───────┐            /\\\n│ Start │───uses─── /End\\\n└───────┘          /_____\\"
+            self.assertEqual(ascii_art, expected)
+        finally:
+            if os.path.exists(test_file):
+                os.remove(test_file)
+
     def test_circle_renders_as_oval_shape(self):
         test_file = "test_oval_circle.diag"
         with open(test_file, "w") as f:

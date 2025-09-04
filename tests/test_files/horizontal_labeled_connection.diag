@@ -1,0 +1,2 @@
+Rectangle(Client) connects to(sends data) horizontal Triangle(Server)
+Circle(Cache) connects to(fetches) horizontal Rectangle(Storage)

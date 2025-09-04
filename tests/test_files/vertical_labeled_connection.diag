@@ -1,0 +1,2 @@
+Rectangle(Database) connects to(queries) Circle(API)
+Square(User) connects to(requests) Rectangle(Database)

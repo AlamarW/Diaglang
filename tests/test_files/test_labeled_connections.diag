@@ -1,0 +1,2 @@
+Rectangle(Start) connects to(uses) Triangle(End)
+Rectangle(A) connects to(labeled) horizontal Triangle(B)

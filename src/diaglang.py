@@ -95,29 +95,40 @@ class DiagReader:
         return ""
     
     def parse_connection(self, connection_input):
-        # Parse "Shape1(Label1) connects to [horizontal] Shape2(Label2)" syntax
-        if " connects to " not in connection_input:
+        # Parse "Shape1(Label1) connects to[(label)] [horizontal] Shape2(Label2)" syntax
+        if " connects to" not in connection_input:
             return None
         
-        parts = connection_input.split(" connects to ")
+        # Split on " connects to"
+        parts = connection_input.split(" connects to", 1)
         if len(parts) != 2:
             return None
         
+        from_part = parts[0].strip()
         to_part = parts[1].strip()
-        horizontal = False
+        
+        # Check for connection label in parentheses
+        connection_label = None
+        if to_part.startswith("(") and ")" in to_part:
+            # Extract the connection label
+            end_paren = to_part.find(")")
+            connection_label = to_part[1:end_paren]
+            to_part = to_part[end_paren+1:].strip()
         
         # Check if horizontal keyword is present
+        horizontal = False
         if to_part.startswith("horizontal "):
             horizontal = True
             to_part = to_part[11:]  # Remove "horizontal " prefix
         
         return {
-            "from": parts[0].strip(),
+            "from": from_part,
             "to": to_part,
-            "horizontal": horizontal
+            "horizontal": horizontal,
+            "label": connection_label
         }
     
-    def render_connection(self, from_shape, to_shape, horizontal=False):
+    def render_connection(self, from_shape, to_shape, horizontal=False, label=None):
         # Render the from shape
         from_rendered = self.render_single_shape(from_shape)
         to_rendered = self.render_single_shape(to_shape)
@@ -129,11 +140,11 @@ class DiagReader:
         to_lines = to_rendered.split('\n')
         
         if horizontal:
-            return self.render_horizontal_connection(from_lines, to_lines)
+            return self.render_horizontal_connection(from_lines, to_lines, label)
         else:
-            return self.render_vertical_connection(from_lines, to_lines)
+            return self.render_vertical_connection(from_lines, to_lines, label)
     
-    def render_vertical_connection(self, from_lines, to_lines):
+    def render_vertical_connection(self, from_lines, to_lines, label=None):
         # Find middle of each shape for connection
         from_middle_line = len(from_lines) // 2
         to_middle_line = len(to_lines) // 2
@@ -152,8 +163,14 @@ class DiagReader:
                 mid_pos = len(bottom_line) // 2
                 modified_from[-1] = bottom_line[:mid_pos] + '┬' + bottom_line[mid_pos+1:]
         
-        # Create connecting lines
-        connection_lines = ['    │', '    │']
+        # Create connecting lines with optional label
+        if label:
+            # Center the label properly on the connection line (4 spaces to align with │)
+            label_padding = max(0, (4 - len(label)) // 2)
+            label_line = ' ' * label_padding + label
+            connection_lines = ['    │', label_line, '    │']
+        else:
+            connection_lines = ['    │', '    │']
         
         # Modify the to shape to have a connection point at the top edge
         modified_to = to_lines.copy()
@@ -168,7 +185,7 @@ class DiagReader:
         result_lines = modified_from + connection_lines + modified_to
         return '\n'.join(result_lines)
     
-    def render_horizontal_connection(self, from_lines, to_lines):
+    def render_horizontal_connection(self, from_lines, to_lines, label=None):
         # Place shapes side by side with horizontal connection
         from_height = len(from_lines)
         to_height = len(to_lines)
@@ -181,9 +198,15 @@ class DiagReader:
         # Get width of from shape
         from_width = max(len(line) for line in from_lines) if from_lines else 0
         
-        # Create horizontal connection line  
-        connection_length = 6  # Number of dashes for connection
-        connection_line = '─' * connection_length
+        # Create horizontal connection with optional label
+        if label:
+            # Include both dashes and label for horizontal connections
+            dash_count = 3  # dashes on each side of label
+            connection_line = '─' * dash_count + label + '─' * dash_count
+            connection_length = len(connection_line)
+        else:
+            connection_length = 6  # Number of dashes for connection
+            connection_line = '─' * connection_length
         
         result_lines = []
         
@@ -225,7 +248,7 @@ class DiagReader:
             # Check if this is a connection
             connection = self.parse_connection(shape_input)
             if connection:
-                rendered_connection = self.render_connection(connection["from"], connection["to"], connection["horizontal"])
+                rendered_connection = self.render_connection(connection["from"], connection["to"], connection["horizontal"], connection["label"])
                 if rendered_connection:
                     rendered_shapes.append(rendered_connection)
             else:
