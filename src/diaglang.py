@@ -94,6 +94,67 @@ class DiagReader:
             return "┌─────┐\n│     │\n└─────┘"
         return ""
     
+    def parse_chain(self, chain_input):
+        # Parse chain like "Rectangle(A) connects to(flows) Triangle(B) connects to(sends) Circle(C)"
+        if " connects to" not in chain_input:
+            return None
+        
+        # Count connections to see if this is a chain
+        connects_count = chain_input.count(" connects to")
+        if connects_count == 1:
+            return None  # Single connection, not a chain
+        
+        # Use regex to find all shape definitions and connections
+        import re
+        
+        # Pattern: ShapeType(Label) connects to(optional_label) [horizontal]
+        pattern = r'(\w+\([^)]*\))\s+connects\s+to(\([^)]*\))?\s*(horizontal)?\s*'
+        
+        # Split the chain and parse each connection
+        connections = []
+        text = chain_input
+        
+        # Find all matches
+        matches = list(re.finditer(pattern, text))
+        
+        if not matches:
+            return None
+            
+        # Extract connections
+        for i, match in enumerate(matches):
+            from_shape = match.group(1)  # ShapeType(Label)
+            label_group = match.group(2)  # (label) or None  
+            horizontal = match.group(3) is not None  # horizontal keyword
+            
+            # Extract label
+            connection_label = None
+            if label_group:
+                connection_label = label_group[1:-1]  # Remove parentheses
+            
+            # Find the target shape
+            if i < len(matches) - 1:
+                # Target is the from_shape of the next connection
+                to_shape = matches[i + 1].group(1)
+            else:
+                # This is the last connection, find the final shape
+                # Look after the current match
+                remaining_text = text[match.end():].strip()
+                # Extract the shape at the beginning of remaining text
+                shape_match = re.match(r'(\w+\([^)]*\))', remaining_text)
+                if shape_match:
+                    to_shape = shape_match.group(1)
+                else:
+                    continue  # Skip if we can't find target shape
+            
+            connections.append({
+                "from": from_shape,
+                "to": to_shape,
+                "horizontal": horizontal,
+                "label": connection_label
+            })
+        
+        return connections if connections else None
+
     def parse_connection(self, connection_input):
         # Parse "Shape1(Label1) connects to[(label)] [horizontal] Shape2(Label2)" syntax
         if " connects to" not in connection_input:
@@ -144,14 +205,21 @@ class DiagReader:
         else:
             return self.render_vertical_connection(from_lines, to_lines, label)
     
+    def get_shape_center_position(self, shape_lines):
+        """Calculate the horizontal center position of a shape"""
+        if not shape_lines:
+            return 0
+        # Use the longest line to determine the shape's width
+        max_width = max(len(line) for line in shape_lines)
+        return max_width // 2
+    
     def render_vertical_connection(self, from_lines, to_lines, label=None):
-        # Find middle of each shape for connection
-        from_middle_line = len(from_lines) // 2
-        to_middle_line = len(to_lines) // 2
+        # Calculate center positions for both shapes
+        from_center = self.get_shape_center_position(from_lines)
+        to_center = self.get_shape_center_position(to_lines)
         
-        # Get width of from shape to determine where to place connection
-        from_width = len(from_lines[0]) if from_lines else 0
-        from_center = from_width // 2
+        # Use the maximum center position to ensure alignment
+        connection_center = max(from_center, to_center)
         
         # Modify the from shape to have a connection point at the bottom middle
         modified_from = from_lines.copy()
@@ -163,23 +231,32 @@ class DiagReader:
                 mid_pos = len(bottom_line) // 2
                 modified_from[-1] = bottom_line[:mid_pos] + '┬' + bottom_line[mid_pos+1:]
         
-        # Create connecting lines with optional label
-        if label:
-            # Center the label properly on the connection line (4 spaces to align with │)
-            label_padding = max(0, (4 - len(label)) // 2)
-            label_line = ' ' * label_padding + label
-            connection_lines = ['    │', label_line, '    │']
-        else:
-            connection_lines = ['    │', '    │']
+        # Pad the from shape if needed to align with connection center
+        if from_center < connection_center:
+            padding = connection_center - from_center
+            padded_from = []
+            for line in modified_from:
+                padded_from.append(' ' * padding + line)
+            modified_from = padded_from
         
-        # Modify the to shape to have a connection point at the top edge
+        # Create connecting lines with proper centering
+        connection_indent = ' ' * connection_center
+        if label:
+            # Center the label on the connection line
+            label_padding = max(0, (connection_center * 2 + 1 - len(label)) // 2)
+            label_line = ' ' * label_padding + label
+            connection_lines = [connection_indent + '│', label_line, connection_indent + '│']
+        else:
+            connection_lines = [connection_indent + '│', connection_indent + '│']
+        
+        # Pad the to shape if needed to align with connection center
         modified_to = to_lines.copy()
-        if len(modified_to) > 0 and modified_to[0].strip():
-            # For triangle, the connection should terminate at the top point, not go through
-            if '/' in modified_to[0] and '\\' in modified_to[0]:
-                # The connection line should end right at the triangle's top point
-                # Don't modify the triangle itself - it should remain intact
-                pass
+        if to_center < connection_center:
+            padding = connection_center - to_center
+            padded_to = []
+            for line in modified_to:
+                padded_to.append(' ' * padding + line)
+            modified_to = padded_to
         
         # Combine all parts
         result_lines = modified_from + connection_lines + modified_to
@@ -238,6 +315,200 @@ class DiagReader:
         
         return '\n'.join(result_lines)
     
+    def render_chain(self, connections):
+        # Render a chain of connections as a single combined diagram
+        if not connections:
+            return ""
+        
+        # Check if all connections are horizontal
+        all_horizontal = all(conn["horizontal"] for conn in connections)
+        all_vertical = all(not conn["horizontal"] for conn in connections)
+        
+        if all_vertical:
+            return self.render_vertical_chain(connections)
+        elif all_horizontal:
+            return self.render_horizontal_chain(connections)
+        else:
+            return self.render_mixed_chain(connections)
+    
+    def render_vertical_chain(self, connections):
+        # Render a purely vertical chain
+        if not connections:
+            return ""
+        
+        # For chains, we need to maintain consistent alignment
+        # First, render all shapes to determine the maximum center position
+        all_shapes = [connections[0]["from"]]
+        for conn in connections:
+            all_shapes.append(conn["to"])
+        
+        rendered_shapes = []
+        center_positions = []
+        for shape in all_shapes:
+            rendered = self.render_single_shape(shape)
+            shape_lines = rendered.split('\n')
+            rendered_shapes.append(shape_lines)
+            center_positions.append(self.get_shape_center_position(shape_lines))
+        
+        # Use the maximum center position for all connections
+        max_center = max(center_positions)
+        connection_indent = ' ' * max_center
+        
+        # Build the chain
+        result_parts = []
+        
+        for i, conn in enumerate(connections):
+            if i == 0:
+                # First shape with connection point
+                from_shape = rendered_shapes[i]
+                from_center = center_positions[i]
+                
+                # Pad first shape if needed
+                if from_center < max_center:
+                    padding = max_center - from_center
+                    padded_shape = []
+                    for line in from_shape:
+                        padded_shape.append(' ' * padding + line)
+                    from_shape = padded_shape
+                
+                # Add connection point to bottom line
+                if from_shape:
+                    bottom_line = from_shape[-1]
+                    if '┘' in bottom_line:
+                        mid_pos = len(bottom_line) // 2
+                        from_shape[-1] = bottom_line[:mid_pos] + '┬' + bottom_line[mid_pos+1:]
+                
+                result_parts.extend(from_shape)
+            
+            # Add connection with label
+            if conn["label"]:
+                label_padding = max(0, (max_center * 2 + 1 - len(conn["label"])) // 2)
+                label_line = ' ' * label_padding + conn["label"]
+                connection_lines = [connection_indent + '│', label_line, connection_indent + '│']
+            else:
+                connection_lines = [connection_indent + '│', connection_indent + '│']
+            
+            result_parts.extend(connection_lines)
+            
+            # Add target shape
+            to_shape = rendered_shapes[i + 1]
+            to_center = center_positions[i + 1]
+            
+            # Pad target shape if needed
+            if to_center < max_center:
+                padding = max_center - to_center
+                padded_shape = []
+                for line in to_shape:
+                    padded_shape.append(' ' * padding + line)
+                to_shape = padded_shape
+            
+            result_parts.extend(to_shape)
+        
+        return '\n'.join(result_parts)
+    
+    def render_horizontal_chain(self, connections):
+        # Render a purely horizontal chain
+        if not connections:
+            return ""
+        
+        # Get all unique shapes in the chain
+        shapes = [connections[0]["from"]]
+        for conn in connections:
+            shapes.append(conn["to"])
+        
+        # Render each shape and calculate their widths
+        rendered_shapes = []
+        shape_widths = []
+        for shape in shapes:
+            shape_lines = self.render_single_shape(shape).split('\n')
+            rendered_shapes.append(shape_lines)
+            # Calculate the maximum width of this shape
+            max_width = max(len(line) for line in shape_lines) if shape_lines else 0
+            shape_widths.append(max_width)
+        
+        # Find max height and calculate optimal connection row
+        max_height = max(len(shape_lines) for shape_lines in rendered_shapes)
+        
+        # Calculate the best connection row by finding where most shapes have their visual center
+        shape_centers = []
+        for shape_lines in rendered_shapes:
+            shape_height = len(shape_lines)
+            offset = (max_height - shape_height) // 2
+            shape_center_in_layout = offset + (shape_height // 2)
+            shape_centers.append(shape_center_in_layout)
+        
+        # Use the most common center position, or the median if they're all different
+        from collections import Counter
+        center_counts = Counter(shape_centers)
+        if center_counts:
+            # Use the most frequent center position
+            global_middle_row = center_counts.most_common(1)[0][0]
+        else:
+            global_middle_row = max_height // 2
+        
+        # Calculate vertical offsets to center each shape
+        shape_offsets = []
+        for shape_lines in rendered_shapes:
+            shape_height = len(shape_lines)
+            offset = (max_height - shape_height) // 2
+            shape_offsets.append(offset)
+        
+        # Build the horizontal layout
+        result_lines = []
+        
+        for row in range(max_height):
+            line = ""
+            
+            for i, shape_lines in enumerate(rendered_shapes):
+                shape_offset = shape_offsets[i]
+                
+                # Check if this row contains part of this shape
+                shape_row = row - shape_offset
+                if 0 <= shape_row < len(shape_lines):
+                    shape_line = shape_lines[shape_row]
+                    line += shape_line
+                    # Only pad if we're not the last shape and we need consistent alignment
+                    # This preserves original spacing while ensuring circle alignment
+                    if i < len(rendered_shapes) - 1:  # Not the last shape
+                        padding_needed = shape_widths[i] - len(shape_line)
+                        if padding_needed > 0:
+                            line += ' ' * padding_needed
+                else:
+                    # Add padding to match the width of this shape's widest line
+                    if shape_lines:
+                        line += ' ' * shape_widths[i]
+                
+                # Add connection between shapes (except after last shape)
+                if i < len(rendered_shapes) - 1:
+                    conn = connections[i]
+                    
+                    if row == global_middle_row:
+                        # Add labeled connection line
+                        if conn["label"]:
+                            connection = f"──{conn['label']}──"
+                        else:
+                            connection = "──────"
+                        line += connection
+                    else:
+                        # Add spacing to match connection width
+                        if conn["label"]:
+                            line += ' ' * (len(conn["label"]) + 4)
+                        else:
+                            line += ' ' * 6
+            
+            result_lines.append(line)
+        
+        return '\n'.join(result_lines)
+    
+    def render_mixed_chain(self, connections):
+        # For now, render mixed chains as individual connections
+        # This is a complex layout problem that needs more sophisticated logic
+        rendered_parts = []
+        for conn in connections:
+            rendered = self.render_connection(conn["from"], conn["to"], conn["horizontal"], conn["label"])
+            rendered_parts.append(rendered)
+        return '\n\n'.join(rendered_parts)
+    
     def render_ascii(self, filename):
         shapes = self.parse_shapes(filename)
         if not shapes:
@@ -245,16 +516,23 @@ class DiagReader:
         
         rendered_shapes = []
         for shape_input in shapes:
-            # Check if this is a connection
-            connection = self.parse_connection(shape_input)
-            if connection:
-                rendered_connection = self.render_connection(connection["from"], connection["to"], connection["horizontal"], connection["label"])
-                if rendered_connection:
-                    rendered_shapes.append(rendered_connection)
+            # Check if this is a chain first
+            chain = self.parse_chain(shape_input)
+            if chain:
+                rendered_chain = self.render_chain(chain)
+                if rendered_chain:
+                    rendered_shapes.append(rendered_chain)
             else:
-                rendered_shape = self.render_single_shape(shape_input)
-                if rendered_shape:
-                    rendered_shapes.append(rendered_shape)
+                # Check if this is a single connection
+                connection = self.parse_connection(shape_input)
+                if connection:
+                    rendered_connection = self.render_connection(connection["from"], connection["to"], connection["horizontal"], connection["label"])
+                    if rendered_connection:
+                        rendered_shapes.append(rendered_connection)
+                else:
+                    rendered_shape = self.render_single_shape(shape_input)
+                    if rendered_shape:
+                        rendered_shapes.append(rendered_shape)
         
         return "\n\n".join(rendered_shapes)
 

@@ -374,6 +374,34 @@ class TestDiagReader(unittest.TestCase):
             if os.path.exists(test_file):
                 os.remove(test_file)
 
+    def test_can_chain_two_nodes_vertically(self):
+        test_file = "test_simple_vertical_chain.diag"
+        with open(test_file, "w") as f:
+            f.write("Rectangle(A) connects to(flows) Triangle(B) connects to(sends) Circle(C)")
+        
+        try:
+            reader = DiagReader()
+            ascii_art = reader.render_ascii(test_file)
+            expected = "┌───┐\n│ A │\n└─┬─┘\n    │\nflows\n    │\n  /\\\n /B \\\n/____\\\n  │\nsends\n  │\n  ______  \n /      \\ \n|   C    |\n \\______/ "
+            self.assertEqual(ascii_art, expected)
+        finally:
+            if os.path.exists(test_file):
+                os.remove(test_file)
+
+    def test_can_chain_two_nodes_horizontally(self):
+        test_file = "test_horizontal_chain.diag"
+        with open(test_file, "w") as f:
+            f.write("Rectangle(A) connects to(flows) horizontal Triangle(B) connects to(sends) horizontal Circle(C)")
+        
+        try:
+            reader = DiagReader()
+            ascii_art = reader.render_ascii(test_file)
+            expected = "┌───┐           /\\             ______  \n│ A │──flows── /B \\ ──sends── /      \\ \n└───┘         /____\\         |   C    |\n                              \\______/ "
+            self.assertEqual(ascii_art, expected)
+        finally:
+            if os.path.exists(test_file):
+                os.remove(test_file)
+
     def test_circle_renders_as_oval_shape(self):
         test_file = "test_oval_circle.diag"
         with open(test_file, "w") as f:
