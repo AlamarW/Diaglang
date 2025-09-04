@@ -27,13 +27,13 @@ class DiagReader:
             elif shape_type == "circle" or shape_type == "cirle":
                 if label is not None:
                     if label == "":
-                        return "  ____  \n /    \\ \n|      |\n \\____/ "
+                        return "  ____  \n /    \\ \n|       |\n \\____/ "
                     # Create proper oval shape  
                     label_len = len(label)
                     width = max(6, label_len + 2)
                     padding_total = width - label_len
-                    pad_left = " " * (padding_total // 2)
-                    pad_right = " " * (padding_total // 2)
+                    pad_left = " " * ((padding_total // 2)+1)
+                    pad_right = " " * ((padding_total // 2)+1)
                     # If odd padding, add extra space to right
                     if padding_total % 2 == 1:
                         pad_right += " "
