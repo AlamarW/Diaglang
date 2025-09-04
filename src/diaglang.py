@@ -26,8 +26,6 @@ class DiagReader:
                 return "┌───┐\n│   │\n└───┘"
             elif shape_type == "circle" or shape_type == "cirle":
                 if label is not None:
-                    if label == "":
-                        return "  ____  \n /    \\ \n|       |\n \\____/ "
                     # Create proper oval shape  
                     label_len = len(label)
                     width = max(6, label_len + 2)

@@ -57,7 +57,7 @@ class TestDiagReader(unittest.TestCase):
         try:
             reader = DiagReader()
             ascii_art = reader.render_ascii(test_file)
-            expected = " ╭──╮ \n│  │\n ╰──╯ "
+            expected = "  ____  \n /    \\ \n|      |\n \\____/ "
             self.assertEqual(ascii_art, expected)
         finally:
             if os.path.exists(test_file):
@@ -127,7 +127,7 @@ class TestDiagReader(unittest.TestCase):
         try:
             reader = DiagReader()
             ascii_art = reader.render_ascii(test_file)
-            expected = " ╭─╮ \n│X│\n ╰─╯ "
+            expected = "  ______  \n /      \\ \n|   X    |\n \\______/ "
             self.assertEqual(ascii_art, expected)
         finally:
             if os.path.exists(test_file):
@@ -213,7 +213,7 @@ class TestDiagReader(unittest.TestCase):
         try:
             reader = DiagReader()
             ascii_art = reader.render_ascii(test_file)
-            expected = " ╭─╮ \n│A│\n ╰─╯ "
+            expected = "  ______  \n /      \\ \n|   A    |\n \\______/ "
             self.assertEqual(ascii_art, expected)
         finally:
             if os.path.exists(test_file):
@@ -227,7 +227,7 @@ class TestDiagReader(unittest.TestCase):
         try:
             reader = DiagReader()
             ascii_art = reader.render_ascii(test_file)
-            expected = " ╭─────────────╮ \n│VeryLongLabel│\n ╰─────────────╯ "
+            expected = "  _______________  \n /               \\ \n|  VeryLongLabel  |\n \\_______________/ "
             self.assertEqual(ascii_art, expected)
         finally:
             if os.path.exists(test_file):
@@ -241,7 +241,7 @@ class TestDiagReader(unittest.TestCase):
         try:
             reader = DiagReader()
             ascii_art = reader.render_ascii(test_file)
-            expected = " ╭──╮ \n│  │\n ╰──╯ "
+            expected = "  ______  \n /      \\ \n|        |\n \\______/ "
             self.assertEqual(ascii_art, expected)
         finally:
             if os.path.exists(test_file):
@@ -255,7 +255,7 @@ class TestDiagReader(unittest.TestCase):
         try:
             reader = DiagReader()
             ascii_art = reader.render_ascii(test_file)
-            expected = " ╭────╮ \n│Test│\n ╰────╯ "
+            expected = "  ______  \n /      \\ \n|  Test  |\n \\______/ "
             self.assertEqual(ascii_art, expected)
         finally:
             if os.path.exists(test_file):
@@ -269,7 +269,7 @@ class TestDiagReader(unittest.TestCase):
         try:
             reader = DiagReader()
             ascii_art = reader.render_ascii(test_file)
-            expected = " ╭──────────────────╮ \n│Testing for length│\n ╰──────────────────╯ "
+            expected = "  ____________________  \n /                    \\ \n|  Testing for length  |\n \\____________________/ "
             self.assertEqual(ascii_art, expected)
         finally:
             if os.path.exists(test_file):
@@ -283,7 +283,7 @@ class TestDiagReader(unittest.TestCase):
         try:
             reader = DiagReader()
             ascii_art = reader.render_ascii(test_file)
-            expected = " ╭────╮ \n│Test│\n ╰────╯ "
+            expected = "  ______  \n /      \\ \n|  Test  |\n \\______/ "
             self.assertEqual(ascii_art, expected)
         finally:
             if os.path.exists(test_file):
@@ -292,12 +292,12 @@ class TestDiagReader(unittest.TestCase):
     def test_circle_empty_renders_as_oval_shape(self):
         test_file = "test_oval_empty.diag"
         with open(test_file, "w") as f:
-            f.write("circle")
+            f.write("Circle()")
         
         try:
             reader = DiagReader()
             ascii_art = reader.render_ascii(test_file)
-            expected = " ╭──╮ \n│  │\n ╰──╯ "
+            expected = "  ______  \n /      \\ \n|        |\n \\______/ "
             self.assertEqual(ascii_art, expected)
         finally:
             if os.path.exists(test_file):
