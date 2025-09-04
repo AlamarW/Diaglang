@@ -84,7 +84,7 @@ class DiagReader:
         return ""
     
     def parse_connection(self, connection_input):
-        # Parse "Shape1(Label1) connects to Shape2(Label2)" syntax
+        # Parse "Shape1(Label1) connects to [horizontal] Shape2(Label2)" syntax
         if " connects to " not in connection_input:
             return None
         
@@ -92,12 +92,21 @@ class DiagReader:
         if len(parts) != 2:
             return None
         
+        to_part = parts[1].strip()
+        horizontal = False
+        
+        # Check if horizontal keyword is present
+        if to_part.startswith("horizontal "):
+            horizontal = True
+            to_part = to_part[11:]  # Remove "horizontal " prefix
+        
         return {
             "from": parts[0].strip(),
-            "to": parts[1].strip()
+            "to": to_part,
+            "horizontal": horizontal
         }
     
-    def render_connection(self, from_shape, to_shape):
+    def render_connection(self, from_shape, to_shape, horizontal=False):
         # Render the from shape
         from_rendered = self.render_single_shape(from_shape)
         to_rendered = self.render_single_shape(to_shape)
@@ -108,6 +117,12 @@ class DiagReader:
         from_lines = from_rendered.split('\n')
         to_lines = to_rendered.split('\n')
         
+        if horizontal:
+            return self.render_horizontal_connection(from_lines, to_lines)
+        else:
+            return self.render_vertical_connection(from_lines, to_lines)
+    
+    def render_vertical_connection(self, from_lines, to_lines):
         # Find middle of each shape for connection
         from_middle_line = len(from_lines) // 2
         to_middle_line = len(to_lines) // 2
@@ -142,6 +157,53 @@ class DiagReader:
         result_lines = modified_from + connection_lines + modified_to
         return '\n'.join(result_lines)
     
+    def render_horizontal_connection(self, from_lines, to_lines):
+        # Place shapes side by side with horizontal connection
+        from_height = len(from_lines)
+        to_height = len(to_lines)
+        max_height = max(from_height, to_height)
+        
+        # Find the middle line for connection
+        from_middle = from_height // 2
+        to_middle = to_height // 2
+        
+        # Get width of from shape
+        from_width = max(len(line) for line in from_lines) if from_lines else 0
+        
+        # Create horizontal connection line  
+        connection_length = 6  # Number of dashes for connection
+        connection_line = '─' * connection_length
+        
+        result_lines = []
+        
+        for i in range(max_height):
+            line = ""
+            
+            # Add from shape line (or padding)
+            if i < from_height:
+                from_line = from_lines[i]
+                # If this is the middle line, modify it to have connection point
+                if i == from_middle and '│' in from_line:
+                    # Replace right border with regular border for clean connection
+                    pass  # Keep the original line unchanged
+                line += from_line
+            else:
+                line += ' ' * from_width
+            
+            # Add connection line (only on middle line)
+            if i == from_middle:
+                line += connection_line
+            else:
+                line += ' ' * connection_length
+            
+            # Add to shape line (or padding)  
+            if i < to_height:
+                line += to_lines[i]
+            
+            result_lines.append(line)
+        
+        return '\n'.join(result_lines)
+    
     def render_ascii(self, filename):
         shapes = self.parse_shapes(filename)
         if not shapes:
@@ -152,7 +214,7 @@ class DiagReader:
             # Check if this is a connection
             connection = self.parse_connection(shape_input)
             if connection:
-                rendered_connection = self.render_connection(connection["from"], connection["to"])
+                rendered_connection = self.render_connection(connection["from"], connection["to"], connection["horizontal"])
                 if rendered_connection:
                     rendered_shapes.append(rendered_connection)
             else:
