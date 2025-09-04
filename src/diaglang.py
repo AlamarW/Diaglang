@@ -83,6 +83,82 @@ class DiagReader:
             return "┌─────┐\n│     │\n└─────┘"
         return ""
     
+    def parse_connection(self, connection_input):
+        # Parse "Shape1(Label1) connects to Shape2(Label2)" syntax
+        if " connects to " not in connection_input:
+            return None
+        
+        parts = connection_input.split(" connects to ")
+        if len(parts) != 2:
+            return None
+        
+        return {
+            "from": parts[0].strip(),
+            "to": parts[1].strip()
+        }
+    
+    def render_connection(self, from_shape, to_shape):
+        # Render the from shape
+        from_rendered = self.render_single_shape(from_shape)
+        to_rendered = self.render_single_shape(to_shape)
+        
+        if not from_rendered or not to_rendered:
+            return ""
+        
+        from_lines = from_rendered.split('\n')
+        to_lines = to_rendered.split('\n')
+        
+        # Find middle of each shape for connection
+        from_middle_line = len(from_lines) // 2
+        to_middle_line = len(to_lines) // 2
+        
+        # Get width of from shape to determine where to place connection
+        from_width = len(from_lines[0]) if from_lines else 0
+        from_center = from_width // 2
+        
+        # Modify the from shape to have a connection point at the bottom middle
+        modified_from = from_lines.copy()
+        if len(modified_from) > 0:
+            # Replace the bottom border with a connection point
+            bottom_line = modified_from[-1]
+            if '┘' in bottom_line:
+                # Find the middle and replace with connection
+                mid_pos = len(bottom_line) // 2
+                modified_from[-1] = bottom_line[:mid_pos] + '┬' + bottom_line[mid_pos+1:]
+        
+        # Create connecting lines
+        connection_lines = ['    │', '    │']
+        
+        # Modify the to shape to have a connection point at the top middle
+        modified_to = to_lines.copy()
+        if len(modified_to) > 0 and modified_to[0].strip():
+            # For triangle, add connection to the top point and modify second line
+            if '/' in modified_to[0] and '\\' in modified_to[0]:
+                # Modify the top line to have connection - replace the space between / and \ with │
+                top_line = modified_to[0]
+                slash_pos = top_line.find('/')
+                backslash_pos = top_line.find('\\')
+                if slash_pos != -1 and backslash_pos != -1:
+                    # Replace everything between / and \ with │
+                    modified_to[0] = top_line[:slash_pos+1] + '│' + top_line[backslash_pos:]
+                
+                # Also modify the second line to show the connection continuing down
+                if len(modified_to) > 1:
+                    second_line = modified_to[1]
+                    if '/' in second_line and '\\' in second_line:
+                        slash_pos = second_line.find('/')
+                        backslash_pos = second_line.find('\\')
+                        if slash_pos != -1 and backslash_pos != -1:
+                            # Add connection line in middle while preserving spaces
+                            mid_spaces = second_line[slash_pos+1:backslash_pos]
+                            mid_pos = len(mid_spaces) // 2
+                            new_middle = mid_spaces[:mid_pos] + '│' + mid_spaces[mid_pos+1:]
+                            modified_to[1] = second_line[:slash_pos+1] + new_middle + second_line[backslash_pos:]
+        
+        # Combine all parts
+        result_lines = modified_from + connection_lines + modified_to
+        return '\n'.join(result_lines)
+    
     def render_ascii(self, filename):
         shapes = self.parse_shapes(filename)
         if not shapes:
@@ -90,9 +166,16 @@ class DiagReader:
         
         rendered_shapes = []
         for shape_input in shapes:
-            rendered_shape = self.render_single_shape(shape_input)
-            if rendered_shape:
-                rendered_shapes.append(rendered_shape)
+            # Check if this is a connection
+            connection = self.parse_connection(shape_input)
+            if connection:
+                rendered_connection = self.render_connection(connection["from"], connection["to"])
+                if rendered_connection:
+                    rendered_shapes.append(rendered_connection)
+            else:
+                rendered_shape = self.render_single_shape(shape_input)
+                if rendered_shape:
+                    rendered_shapes.append(rendered_shape)
         
         return "\n\n".join(rendered_shapes)
 
