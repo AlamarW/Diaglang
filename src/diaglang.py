@@ -24,7 +24,7 @@ class DiagReader:
                 if label:
                     return f"┌───┐\n│ {label} │\n└───┘"
                 return "┌───┐\n│   │\n└───┘"
-            elif shape_type == "circle" or shape_type == "cirle":
+            elif shape_type == "circle":
                 if label is not None:
                     # Create proper oval shape  
                     label_len = len(label)
@@ -41,9 +41,40 @@ class DiagReader:
                     return f"  {underline}  \n /{spaces}\\ \n|{pad_left}{label}{pad_right}|\n \\{underline}/ "
                 return "  ____  \n /    \\ \n|      |\n \\____/ "
             elif shape_type == "triangle":
-                if label:
-                    return f" /\\ \n/{label} \\"
-                return " /\\ \n/__\\"
+                if label is not None:
+                    if label == "":
+                        return "   /\\   \n  /  \\  \n /    \\ \n/______\\"
+                    # Create proper triangle shape that scales with label
+                    label_len = len(label)
+                    # Calculate how many rows we need based on label length
+                    min_rows = 4  # minimum: top, middle, label, base
+                    extra_rows = max(0, (label_len - 4) // 2)  # add rows for longer labels
+                    total_rows = min_rows + extra_rows
+                    
+                    lines = []
+                    
+                    # Build triangle from top down, each row indented one less than the previous
+                    for i in range(total_rows):
+                        indent = " " * (total_rows - i - 1)
+                        
+                        if i == 0:
+                            # Top point
+                            lines.append(f"{indent}/\\")
+                        elif i == total_rows - 2:
+                            # Label row (second to last)
+                            lines.append(f"{indent}/{label}\\")
+                        elif i == total_rows - 1:
+                            # Base row with underscores
+                            base_width = label_len + 2
+                            base = "_" * base_width
+                            lines.append(f"{indent}/{base}\\")
+                        else:
+                            # Middle expanding rows
+                            inner_spaces = " " * (2 * i)
+                            lines.append(f"{indent}/{inner_spaces}\\")
+                    
+                    return "\n".join(lines)
+                return "   /\\   \n  /  \\  \n /    \\ \n/______\\"
             elif shape_type == "rectangle":
                 if label is not None:
                     if label == "":

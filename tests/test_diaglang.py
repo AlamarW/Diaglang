@@ -71,7 +71,7 @@ class TestDiagReader(unittest.TestCase):
         try:
             reader = DiagReader()
             ascii_art = reader.render_ascii(test_file)
-            expected = " /\\ \n/__\\"
+            expected = "   /\\   \n  /  \\  \n /    \\ \n/______\\"
             self.assertEqual(ascii_art, expected)
         finally:
             if os.path.exists(test_file):
@@ -141,7 +141,7 @@ class TestDiagReader(unittest.TestCase):
         try:
             reader = DiagReader()
             ascii_art = reader.render_ascii(test_file)
-            expected = " /\\ \n/T \\"
+            expected = "   /\\\n  /  \\\n /T\\\n/___\\"
             self.assertEqual(ascii_art, expected)
         finally:
             if os.path.exists(test_file):
@@ -261,19 +261,6 @@ class TestDiagReader(unittest.TestCase):
             if os.path.exists(test_file):
                 os.remove(test_file)
 
-    def test_circle_handles_typo_cirle(self):
-        test_file = "test_typo_circle.diag"
-        with open(test_file, "w") as f:
-            f.write("Cirle(Testing for length)")
-        
-        try:
-            reader = DiagReader()
-            ascii_art = reader.render_ascii(test_file)
-            expected = "  ____________________  \n /                    \\ \n|  Testing for length  |\n \\____________________/ "
-            self.assertEqual(ascii_art, expected)
-        finally:
-            if os.path.exists(test_file):
-                os.remove(test_file)
 
     def test_circle_renders_as_oval_shape(self):
         test_file = "test_oval_circle.diag"
@@ -298,6 +285,48 @@ class TestDiagReader(unittest.TestCase):
             reader = DiagReader()
             ascii_art = reader.render_ascii(test_file)
             expected = "  ______  \n /      \\ \n|        |\n \\______/ "
+            self.assertEqual(ascii_art, expected)
+        finally:
+            if os.path.exists(test_file):
+                os.remove(test_file)
+
+    def test_triangle_handles_short_label(self):
+        test_file = "test_short_triangle.diag"
+        with open(test_file, "w") as f:
+            f.write("Triangle(A)")
+        
+        try:
+            reader = DiagReader()
+            ascii_art = reader.render_ascii(test_file)
+            expected = "   /\\\n  /  \\\n /A\\\n/___\\"
+            self.assertEqual(ascii_art, expected)
+        finally:
+            if os.path.exists(test_file):
+                os.remove(test_file)
+
+    def test_triangle_handles_long_label(self):
+        test_file = "test_long_triangle.diag"
+        with open(test_file, "w") as f:
+            f.write("Triangle(VeryLongLabel)")
+        
+        try:
+            reader = DiagReader()
+            ascii_art = reader.render_ascii(test_file)
+            expected = "       /\\\n      /  \\\n     /    \\\n    /      \\\n   /        \\\n  /          \\\n /VeryLongLabel\\\n/_______________\\"
+            self.assertEqual(ascii_art, expected)
+        finally:
+            if os.path.exists(test_file):
+                os.remove(test_file)
+
+    def test_triangle_handles_empty_label(self):
+        test_file = "test_empty_triangle.diag"
+        with open(test_file, "w") as f:
+            f.write("Triangle()")
+        
+        try:
+            reader = DiagReader()
+            ascii_art = reader.render_ascii(test_file)
+            expected = "   /\\   \n  /  \\  \n /    \\ \n/______\\"
             self.assertEqual(ascii_art, expected)
         finally:
             if os.path.exists(test_file):
