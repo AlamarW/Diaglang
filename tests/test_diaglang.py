@@ -154,7 +154,7 @@ class TestDiagReader(unittest.TestCase):
             f.write("Square(CLI)")
         
         try:
-            result = subprocess.run(["python3", "src/diaglang.py", test_file], 
+            result = subprocess.run(["python3", "src/main.py", test_file], 
                                   capture_output=True, text=True)
             expected = "┌─────┐\n│ CLI │\n└─────┘"
             self.assertEqual(result.stdout.strip(), expected)
