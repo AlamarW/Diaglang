@@ -107,8 +107,8 @@ class DiagReader:
         # Use regex to find all shape definitions and connections
         import re
         
-        # Pattern: ShapeType(Label) connects to(optional_label) [horizontal]
-        pattern = r'(\w+\([^)]*\))\s+connects\s+to(\([^)]*\))?\s*(horizontal)?\s*'
+        # Pattern: ShapeType(Label) connects to(optional_label) (horizontal|vertical)
+        pattern = r'(\w+\([^)]*\))\s+connects\s+to(\([^)]*\))?\s+(horizontal|vertical)\s*'
         
         # Split the chain and parse each connection
         connections = []
@@ -124,7 +124,8 @@ class DiagReader:
         for i, match in enumerate(matches):
             from_shape = match.group(1)  # ShapeType(Label)
             label_group = match.group(2)  # (label) or None  
-            horizontal = match.group(3) is not None  # horizontal keyword
+            direction = match.group(3)  # horizontal or vertical
+            horizontal = (direction == "horizontal")
             
             # Extract label
             connection_label = None
@@ -176,11 +177,17 @@ class DiagReader:
             connection_label = to_part[1:end_paren]
             to_part = to_part[end_paren+1:].strip()
         
-        # Check if horizontal keyword is present
-        horizontal = False
+        # Check for required direction keyword
+        horizontal = None
         if to_part.startswith("horizontal "):
             horizontal = True
             to_part = to_part[11:]  # Remove "horizontal " prefix
+        elif to_part.startswith("vertical "):
+            horizontal = False
+            to_part = to_part[9:]  # Remove "vertical " prefix
+        else:
+            # No direction specified - return None to indicate invalid syntax
+            return None
         
         return {
             "from": from_part,

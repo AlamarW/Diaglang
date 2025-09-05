@@ -279,7 +279,7 @@ class TestDiagReader(unittest.TestCase):
     def test_can_connect_two_nodes(self):
         test_file = "test_connection.diag"
         with open(test_file, "w") as f:
-            f.write("Rectangle(Node1) connects to Triangle(Node2)")
+            f.write("Rectangle(Node1) connects to vertical Triangle(Node2)")
         
         try:
             reader = DiagReader()
@@ -349,7 +349,7 @@ class TestDiagReader(unittest.TestCase):
     def test_can_connect_nodes_with_label(self):
         test_file = "test_labeled_connection.diag"
         with open(test_file, "w") as f:
-            f.write("Rectangle(Start) connects to(uses) Triangle(End)")
+            f.write("Rectangle(Start) connects to(uses) vertical Triangle(End)")
         
         try:
             reader = DiagReader()
@@ -377,7 +377,7 @@ class TestDiagReader(unittest.TestCase):
     def test_can_chain_two_nodes_vertically(self):
         test_file = "test_simple_vertical_chain.diag"
         with open(test_file, "w") as f:
-            f.write("Rectangle(A) connects to(flows) Triangle(B) connects to(sends) Circle(C)")
+            f.write("Rectangle(A) connects to(flows) vertical Triangle(B) connects to(sends) vertical Circle(C)")
         
         try:
             reader = DiagReader()
@@ -405,7 +405,7 @@ class TestDiagReader(unittest.TestCase):
     def test_can_chain_mixed_directions(self):
         test_file = "test_mixed_chain.diag"
         with open(test_file, "w") as f:
-            f.write("Rectangle(A) connects to(flows) horizontal Triangle(B) connects to(sends) Circle(C)")
+            f.write("Rectangle(A) connects to(flows) horizontal Triangle(B) connects to(sends) vertical Circle(C)")
         
         try:
             reader = DiagReader()
@@ -413,6 +413,24 @@ class TestDiagReader(unittest.TestCase):
             # This should render A horizontal to B, then B vertical to C
             expected = "┌───┐             /\\\n│ A │───flows─── /B \\\n└───┘           /____\\\n           │\n        sends\n           │\n        ______  \n       /      \\ \n      |   C    |\n       \\______/ "
             self.assertEqual(ascii_art, expected)
+        finally:
+            if os.path.exists(test_file):
+                os.remove(test_file)
+
+    def test_rejects_implicit_connection_direction(self):
+        test_file = "test_implicit_connection.diag"
+        with open(test_file, "w") as f:
+            f.write("Rectangle(A) connects to(label) Triangle(B)")
+        
+        try:
+            reader = DiagReader()
+            ascii_art = reader.render_ascii(test_file)
+            # Should not create a connection, instead should render as invalid shape
+            # The text becomes a rectangle label since the connection syntax is invalid
+            self.assertIn("A) connects t", ascii_art)  # Truncated label in rectangle
+            # Should not contain connection elements (but avoid rectangle border chars)
+            self.assertNotIn("┬", ascii_art)  # No connection points
+            self.assertNotIn("label", ascii_art)  # No connection labels flowing between shapes
         finally:
             if os.path.exists(test_file):
                 os.remove(test_file)
