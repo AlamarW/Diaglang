@@ -354,7 +354,7 @@ class TestDiagReader(unittest.TestCase):
         try:
             reader = DiagReader()
             ascii_art = reader.render_ascii(test_file)
-            expected = "┌───────┐\n│ Start │\n└───┬───┘\n    │\nuses\n    │\n  /\\\n /End\\\n/_____\\"
+            expected = "┌───────┐\n│ Start │\n└───┬───┘\n    │\n  uses\n    │\n   /\\\n  /End\\\n /_____\\"
             self.assertEqual(ascii_art, expected)
         finally:
             if os.path.exists(test_file):
@@ -382,7 +382,7 @@ class TestDiagReader(unittest.TestCase):
         try:
             reader = DiagReader()
             ascii_art = reader.render_ascii(test_file)
-            expected = "┌───┐\n│ A │\n└─┬─┘\n    │\nflows\n    │\n  /\\\n /B \\\n/____\\\n  │\nsends\n  │\n  ______  \n /      \\ \n|   C    |\n \\______/ "
+            expected = "   ┌───┐\n   │ A │\n   └┬──┘\n     │\n   flows\n     │\n    /\\\n   /B \\\n  /____\\\n     │\n   sends\n     │\n  ______  \n /      \\ \n|   C    |\n \\______/ "
             self.assertEqual(ascii_art, expected)
         finally:
             if os.path.exists(test_file):
@@ -397,6 +397,21 @@ class TestDiagReader(unittest.TestCase):
             reader = DiagReader()
             ascii_art = reader.render_ascii(test_file)
             expected = "┌───┐           /\\             ______  \n│ A │──flows── /B \\ ──sends── /      \\ \n└───┘         /____\\         |   C    |\n                              \\______/ "
+            self.assertEqual(ascii_art, expected)
+        finally:
+            if os.path.exists(test_file):
+                os.remove(test_file)
+
+    def test_can_chain_mixed_directions(self):
+        test_file = "test_mixed_chain.diag"
+        with open(test_file, "w") as f:
+            f.write("Rectangle(A) connects to(flows) horizontal Triangle(B) connects to(sends) Circle(C)")
+        
+        try:
+            reader = DiagReader()
+            ascii_art = reader.render_ascii(test_file)
+            # This should render A horizontal to B, then B vertical to C
+            expected = "┌───┐             /\\\n│ A │───flows─── /B \\\n└───┘           /____\\\n           │\n        sends\n           │\n        ______  \n       /      \\ \n      |   C    |\n       \\______/ "
             self.assertEqual(ascii_art, expected)
         finally:
             if os.path.exists(test_file):

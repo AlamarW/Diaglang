@@ -501,13 +501,136 @@ class DiagReader:
         return '\n'.join(result_lines)
     
     def render_mixed_chain(self, connections):
-        # For now, render mixed chains as individual connections
-        # This is a complex layout problem that needs more sophisticated logic
-        rendered_parts = []
-        for conn in connections:
-            rendered = self.render_connection(conn["from"], conn["to"], conn["horizontal"], conn["label"])
-            rendered_parts.append(rendered)
-        return '\n\n'.join(rendered_parts)
+        # Render a chain with mixed horizontal and vertical connections
+        if not connections:
+            return ""
+        
+        # Strategy: Build the chain step by step, combining shapes at connection points
+        result_parts = []
+        
+        # Start with the first connection
+        first_conn = connections[0]
+        current_diagram = self.render_connection(
+            first_conn["from"], first_conn["to"], 
+            first_conn["horizontal"], first_conn["label"]
+        )
+        
+        if len(connections) == 1:
+            return current_diagram
+        
+        current_lines = current_diagram.split('\n')
+        
+        # Process remaining connections
+        for i in range(1, len(connections)):
+            conn = connections[i]
+            
+            # The "from" shape of this connection should already be the "to" shape of the previous
+            # We need to append the new connection to the existing diagram
+            
+            if conn["horizontal"]:
+                # Add horizontal connection to the right of current diagram
+                current_lines = self.append_horizontal_connection(
+                    current_lines, conn["to"], conn["label"]
+                )
+            else:
+                # Add vertical connection below current diagram  
+                current_lines = self.append_vertical_connection(
+                    current_lines, conn["to"], conn["label"]
+                )
+        
+        return '\n'.join(current_lines)
+    
+    def append_horizontal_connection(self, current_lines, to_shape, label):
+        # Add a horizontal connection to the right of the current diagram
+        to_rendered = self.render_single_shape(to_shape).split('\n')
+        
+        # Find the height and middle row
+        current_height = len(current_lines)
+        to_height = len(to_rendered)
+        max_height = max(current_height, to_height)
+        
+        # Calculate middle row for connection
+        middle_row = (max_height - 1) // 2
+        
+        # Build the combined layout
+        result_lines = []
+        for row in range(max_height):
+            line = ""
+            
+            # Add current diagram content
+            if row < current_height:
+                line += current_lines[row]
+            else:
+                # Pad with spaces to match the width
+                if current_lines:
+                    line += ' ' * len(current_lines[0])
+            
+            # Add connection
+            if row == middle_row:
+                if label:
+                    connection = f"──{label}──"
+                else:
+                    connection = "──────"
+                line += connection
+            else:
+                # Add spacing
+                if label:
+                    line += ' ' * (len(label) + 4)
+                else:
+                    line += ' ' * 6
+            
+            # Add to shape
+            if row < to_height:
+                line += to_rendered[row]
+            
+            result_lines.append(line)
+        
+        return result_lines
+    
+    def append_vertical_connection(self, current_lines, to_shape, label):
+        # Add a vertical connection below the current diagram
+        to_rendered = self.render_single_shape(to_shape).split('\n')
+        
+        # Find the center of the current diagram to place the connection
+        current_width = max(len(line) for line in current_lines) if current_lines else 0
+        connection_center = current_width // 2
+        
+        # Modify the last line of current diagram to add connection point
+        modified_current = current_lines.copy()
+        if modified_current:
+            last_line = modified_current[-1]
+            # Look for shape borders that can have connection points added
+            if '┘' in last_line or '└' in last_line:
+                # Find a good position to add the connection point
+                mid_pos = len(last_line.rstrip()) // 2
+                if mid_pos < len(last_line) and last_line[mid_pos] in '─┘└':
+                    # Replace with connection point
+                    last_line = last_line[:mid_pos] + '┬' + last_line[mid_pos+1:]
+                    modified_current[-1] = last_line
+        
+        # Create connection lines
+        connection_indent = ' ' * connection_center
+        if label:
+            label_padding = max(0, (current_width - len(label)) // 2)
+            label_line = ' ' * label_padding + label
+            connection_lines = [connection_indent + '│', label_line, connection_indent + '│']
+        else:
+            connection_lines = [connection_indent + '│', connection_indent + '│']
+        
+        # Center the to_shape under the current diagram
+        to_center = self.get_shape_center_position(to_rendered)
+        to_padding = connection_center - to_center
+        
+        padded_to = []
+        for line in to_rendered:
+            if to_padding > 0:
+                padded_to.append(' ' * to_padding + line)
+            else:
+                padded_to.append(line)
+        
+        # Combine all parts
+        result_lines = modified_current + connection_lines + padded_to
+        return result_lines
     
     def render_ascii(self, filename):
         shapes = self.parse_shapes(filename)
