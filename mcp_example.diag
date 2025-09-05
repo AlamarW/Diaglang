@@ -1,0 +1,3 @@
+Circle(MCP Protocol) connects to(point away) horizontal Rectangle(MCP Server) connects to(point away) horizontal Triangle(File System)
+Rectangle(MCP Server) connects to(point away) vertical Square(Database)
+Rectangle(Claude Client) connects to(double point) vertical Rectangle(User Interface)

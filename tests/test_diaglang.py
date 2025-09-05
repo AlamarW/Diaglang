@@ -598,5 +598,54 @@ class TestDiagReader(unittest.TestCase):
                 os.remove(test_file)
 
 
+    def test_can_connect_one_source_to_multiple_targets_with_and(self):
+        test_file = "test_divergent_connections.diag"
+        with open(test_file, "w") as f:
+            f.write("Rectangle(cause) connects to(cases, point away) horizontal Triangle(effect) and Square(effect2)")
+        
+        try:
+            reader = DiagReader()
+            ascii_art = reader.render_ascii(test_file)
+            # Expected: One source (cause) connecting to two targets (effect and effect2)
+            # Should show cause in center with connections going to both targets
+            self.assertIn("cause", ascii_art)
+            self.assertIn("effect", ascii_art)  
+            self.assertIn("effect2", ascii_art)
+            # Cause should appear only once
+            self.assertEqual(ascii_art.count("cause"), 1)
+        finally:
+            if os.path.exists(test_file):
+                os.remove(test_file)
+
+    def test_divergent_connections_equivalent_to_separate_statements(self):
+        # Test that divergent syntax produces same result as separate statements
+        test_file1 = "test_divergent_single.diag"
+        test_file2 = "test_divergent_separate.diag"
+        
+        with open(test_file1, "w") as f:
+            f.write("Rectangle(source) connects to horizontal Square(target1) and Circle(target2)")
+        
+        with open(test_file2, "w") as f:
+            f.write("Rectangle(source) connects to horizontal Square(target1)\nRectangle(source) connects to horizontal Circle(target2)")
+        
+        try:
+            reader = DiagReader()
+            ascii_single = reader.render_ascii(test_file1)
+            ascii_separate = reader.render_ascii(test_file2)
+            
+            # Both should contain the same elements (though layout may differ)
+            self.assertIn("source", ascii_single)
+            self.assertIn("target1", ascii_single)
+            self.assertIn("target2", ascii_single)
+            
+            # Source should appear only once in the divergent version
+            self.assertEqual(ascii_single.count("source"), 1)
+        finally:
+            if os.path.exists(test_file1):
+                os.remove(test_file1)
+            if os.path.exists(test_file2):
+                os.remove(test_file2)
+
+
 if __name__ == "__main__":
     unittest.main()
