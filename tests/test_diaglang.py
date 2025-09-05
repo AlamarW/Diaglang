@@ -411,7 +411,7 @@ class TestDiagReader(unittest.TestCase):
             reader = DiagReader()
             ascii_art = reader.render_ascii(test_file)
             # This should render A horizontal to B, then B vertical to C
-            expected = "┌───┐             /\\\n│ A │───flows─── /B \\\n└───┘           /____\\\n           │\n        sends\n           │\n        ______  \n       /      \\ \n      |   C    |\n       \\______/ "
+            expected = "┌───┐             /\\\n│ A │───flows─── /B \\\n└───┘           /____\\\n                   │\n        sends\n                   │\n                ______  \n               /      \\ \n              |   C    |\n               \\______/ "
             self.assertEqual(ascii_art, expected)
         finally:
             if os.path.exists(test_file):

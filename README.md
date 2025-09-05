@@ -81,17 +81,17 @@ Output:
 │ Web Server │───HTTP─── /               \ 
 └────────────┘          |  Load Balancer  |
                          \_______________/ 
-                     │
-                distribute
-                     │
-                    /\
-                   /  \
-                  /    \
-                 /      \
-                /        \
-               /          \
-              /App Instance\
-             /______________\
+                                 │
+                            distribute
+                                 │
+                                /\
+                               /  \
+                              /    \
+                             /      \
+                            /        \
+                           /          \
+                          /App Instance\
+                         /______________\
 ```
 
 ## File Extension

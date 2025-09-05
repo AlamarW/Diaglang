@@ -598,9 +598,37 @@ class DiagReader:
         # Add a vertical connection below the current diagram
         to_rendered = self.render_single_shape(to_shape).split('\n')
         
-        # Find the center of the current diagram to place the connection
+        # Find the center of the last shape in the current diagram to place the connection
+        # For mixed chains, we need to connect to the rightmost shape, not the center of the whole diagram
         current_width = max(len(line) for line in current_lines) if current_lines else 0
-        connection_center = current_width // 2
+        
+        # Find the rightmost shape's center by looking at the bottom line of current diagram
+        # The bottom line typically shows the shape boundaries most clearly
+        if current_lines:
+            bottom_line = current_lines[-1].rstrip()
+            # Look for shape boundary characters from the right
+            shape_end = len(bottom_line)
+            shape_start = 0
+            
+            # Find the rightmost shape boundary by looking for shape characters
+            # Work backwards from the end to find where the last shape starts
+            for i in range(len(bottom_line) - 1, -1, -1):
+                char = bottom_line[i]
+                if char in '┘└/|\\':  # Shape boundary characters
+                    shape_end = i + 1
+                    break
+            
+            # Now find the start of this shape
+            for i in range(shape_end - 1, -1, -1):
+                char = bottom_line[i] 
+                if char in ' ':  # Space indicates start of shape area
+                    shape_start = i + 1
+                    break
+            
+            # Center of the rightmost shape
+            connection_center = (shape_start + shape_end) // 2
+        else:
+            connection_center = current_width // 2
         
         # Modify the last line of current diagram to add connection point
         modified_current = current_lines.copy()
