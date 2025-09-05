@@ -127,10 +127,25 @@ class DiagReader:
             direction = match.group(3)  # horizontal or vertical
             horizontal = (direction == "horizontal")
             
-            # Extract label
+            # Extract label and arrow type
             connection_label = None
+            arrow_type = None
             if label_group:
-                connection_label = label_group[1:-1]  # Remove parentheses
+                paren_content = label_group[1:-1]  # Remove parentheses
+                
+                # Check if content has comma (label, arrow_type format)
+                if "," in paren_content:
+                    parts = paren_content.split(",", 1)
+                    connection_label = parts[0].strip()
+                    potential_arrow_type = parts[1].strip()
+                    if potential_arrow_type in ["point away", "point from", "double point"]:
+                        arrow_type = potential_arrow_type
+                else:
+                    # Single content - check if it's an arrow type or regular label
+                    if paren_content in ["point away", "point from", "double point"]:
+                        arrow_type = paren_content
+                    else:
+                        connection_label = paren_content
             
             # Find the target shape
             if i < len(matches) - 1:
@@ -151,7 +166,8 @@ class DiagReader:
                 "from": from_shape,
                 "to": to_shape,
                 "horizontal": horizontal,
-                "label": connection_label
+                "label": connection_label,
+                "arrow_type": arrow_type
             })
         
         return connections if connections else None
@@ -171,11 +187,26 @@ class DiagReader:
         
         # Check for connection label in parentheses
         connection_label = None
+        arrow_type = None
         if to_part.startswith("(") and ")" in to_part:
-            # Extract the connection label
+            # Extract the content within parentheses
             end_paren = to_part.find(")")
-            connection_label = to_part[1:end_paren]
+            paren_content = to_part[1:end_paren]
             to_part = to_part[end_paren+1:].strip()
+            
+            # Check if content has comma (label, arrow_type format)
+            if "," in paren_content:
+                parts = paren_content.split(",", 1)
+                connection_label = parts[0].strip()
+                potential_arrow_type = parts[1].strip()
+                if potential_arrow_type in ["point away", "point from", "double point"]:
+                    arrow_type = potential_arrow_type
+            else:
+                # Single content - check if it's an arrow type or regular label
+                if paren_content in ["point away", "point from", "double point"]:
+                    arrow_type = paren_content
+                else:
+                    connection_label = paren_content
         
         # Check for required direction keyword
         horizontal = None
@@ -193,10 +224,11 @@ class DiagReader:
             "from": from_part,
             "to": to_part,
             "horizontal": horizontal,
-            "label": connection_label
+            "label": connection_label,
+            "arrow_type": arrow_type
         }
     
-    def render_connection(self, from_shape, to_shape, horizontal=False, label=None):
+    def render_connection(self, from_shape, to_shape, horizontal=False, label=None, arrow_type=None):
         # Render the from shape
         from_rendered = self.render_single_shape(from_shape)
         to_rendered = self.render_single_shape(to_shape)
@@ -208,9 +240,9 @@ class DiagReader:
         to_lines = to_rendered.split('\n')
         
         if horizontal:
-            return self.render_horizontal_connection(from_lines, to_lines, label)
+            return self.render_horizontal_connection(from_lines, to_lines, label, arrow_type)
         else:
-            return self.render_vertical_connection(from_lines, to_lines, label)
+            return self.render_vertical_connection(from_lines, to_lines, label, arrow_type)
     
     def get_shape_center_position(self, shape_lines):
         """Calculate the horizontal center position of a shape"""
@@ -220,7 +252,7 @@ class DiagReader:
         max_width = max(len(line) for line in shape_lines)
         return max_width // 2
     
-    def render_vertical_connection(self, from_lines, to_lines, label=None):
+    def render_vertical_connection(self, from_lines, to_lines, label=None, arrow_type=None):
         # Calculate center positions for both shapes
         from_center = self.get_shape_center_position(from_lines)
         to_center = self.get_shape_center_position(to_lines)
@@ -246,9 +278,31 @@ class DiagReader:
                 padded_from.append(' ' * padding + line)
             modified_from = padded_from
         
-        # Create connecting lines with proper centering
+        # Create connecting lines with proper centering and arrow type
         connection_indent = ' ' * connection_center
-        if label:
+        if arrow_type and label:
+            # Handle both label and vertical arrow type
+            label_padding = max(0, (connection_center * 2 + 1 - len(label)) // 2)
+            label_line = ' ' * label_padding + label
+            if arrow_type == "point away":
+                connection_lines = [connection_indent + '|', label_line, connection_indent + 'v']
+            elif arrow_type == "point from":
+                connection_lines = [connection_indent + '^', label_line, connection_indent + '|']
+            elif arrow_type == "double point":
+                connection_lines = [connection_indent + '^', label_line, connection_indent + 'v']
+            else:
+                connection_lines = [connection_indent + '│', label_line, connection_indent + '│']  # fallback
+        elif arrow_type:
+            # Handle vertical arrow types only
+            if arrow_type == "point away":
+                connection_lines = [connection_indent + '|', connection_indent + '|', connection_indent + 'v']
+            elif arrow_type == "point from":
+                connection_lines = [connection_indent + '^', connection_indent + '|', connection_indent + '|']
+            elif arrow_type == "double point":
+                connection_lines = [connection_indent + '^', connection_indent + '|', connection_indent + 'v']
+            else:
+                connection_lines = [connection_indent + '│', connection_indent + '│']  # fallback
+        elif label:
             # Center the label on the connection line
             label_padding = max(0, (connection_center * 2 + 1 - len(label)) // 2)
             label_line = ' ' * label_padding + label
@@ -269,7 +323,7 @@ class DiagReader:
         result_lines = modified_from + connection_lines + modified_to
         return '\n'.join(result_lines)
     
-    def render_horizontal_connection(self, from_lines, to_lines, label=None):
+    def render_horizontal_connection(self, from_lines, to_lines, label=None, arrow_type=None):
         # Place shapes side by side with horizontal connection
         from_height = len(from_lines)
         to_height = len(to_lines)
@@ -282,8 +336,31 @@ class DiagReader:
         # Get width of from shape
         from_width = max(len(line) for line in from_lines) if from_lines else 0
         
-        # Create horizontal connection with optional label
-        if label:
+        # Create horizontal connection with optional label and arrow type
+        if arrow_type and label:
+            # Handle both label and arrow type: ───label───>
+            dash_count = 3  # dashes on each side of label
+            if arrow_type == "point away":
+                connection_line = '─' * dash_count + label + '─' * dash_count + '>'
+            elif arrow_type == "point from":
+                connection_line = '<' + '─' * dash_count + label + '─' * dash_count
+            elif arrow_type == "double point":
+                connection_line = '<' + '─' * dash_count + label + '─' * dash_count + '>'
+            else:
+                connection_line = '─' * dash_count + label + '─' * dash_count  # fallback
+            connection_length = len(connection_line)
+        elif arrow_type:
+            # Handle arrow types only
+            if arrow_type == "point away":
+                connection_line = "────────>"
+            elif arrow_type == "point from":
+                connection_line = "<────────"
+            elif arrow_type == "double point":
+                connection_line = "<──────>"
+            else:
+                connection_line = "─" * 9  # fallback
+            connection_length = len(connection_line)
+        elif label:
             # Include both dashes and label for horizontal connections
             dash_count = 3  # dashes on each side of label
             connection_line = '─' * dash_count + label + '─' * dash_count
@@ -490,15 +567,41 @@ class DiagReader:
                     conn = connections[i]
                     
                     if row == global_middle_row:
-                        # Add labeled connection line
-                        if conn["label"]:
+                        # Add connection line with arrow type and label support
+                        if conn.get("arrow_type") and conn.get("label"):
+                            # Handle both label and arrow type: ───label───>
+                            dash_count = 3
+                            if conn["arrow_type"] == "point away":
+                                connection = '─' * dash_count + conn["label"] + '─' * dash_count + '>'
+                            elif conn["arrow_type"] == "point from":
+                                connection = '<' + '─' * dash_count + conn["label"] + '─' * dash_count
+                            elif conn["arrow_type"] == "double point":
+                                connection = '<' + '─' * dash_count + conn["label"] + '─' * dash_count + '>'
+                            else:
+                                connection = '─' * dash_count + conn["label"] + '─' * dash_count  # fallback
+                        elif conn.get("arrow_type"):
+                            # Handle arrow types only
+                            if conn["arrow_type"] == "point away":
+                                connection = "────────>"
+                            elif conn["arrow_type"] == "point from":
+                                connection = "<────────"
+                            elif conn["arrow_type"] == "double point":
+                                connection = "<──────>"
+                            else:
+                                connection = "─" * 9  # fallback
+                        elif conn["label"]:
                             connection = f"──{conn['label']}──"
                         else:
                             connection = "──────"
                         line += connection
                     else:
                         # Add spacing to match connection width
-                        if conn["label"]:
+                        if conn.get("arrow_type") and conn.get("label"):
+                            # Labeled arrow connections: length = 3 + label_length + 3 + 1
+                            line += ' ' * (len(conn["label"]) + 7)
+                        elif conn.get("arrow_type"):
+                            line += ' ' * 9  # Arrow connections are 9 characters
+                        elif conn["label"]:
                             line += ' ' * (len(conn["label"]) + 4)
                         else:
                             line += ' ' * 6
@@ -519,7 +622,7 @@ class DiagReader:
         first_conn = connections[0]
         current_diagram = self.render_connection(
             first_conn["from"], first_conn["to"], 
-            first_conn["horizontal"], first_conn["label"]
+            first_conn["horizontal"], first_conn["label"], first_conn.get("arrow_type")
         )
         
         if len(connections) == 1:
@@ -684,7 +787,7 @@ class DiagReader:
                 # Check if this is a single connection
                 connection = self.parse_connection(shape_input)
                 if connection:
-                    rendered_connection = self.render_connection(connection["from"], connection["to"], connection["horizontal"], connection["label"])
+                    rendered_connection = self.render_connection(connection["from"], connection["to"], connection["horizontal"], connection["label"], connection.get("arrow_type"))
                     if rendered_connection:
                         rendered_shapes.append(rendered_connection)
                 else:

@@ -506,5 +506,97 @@ class TestDiagReader(unittest.TestCase):
                 os.remove(test_file)
 
 
+    def test_can_specify_arrow_types_horizontal_point_away(self):
+        test_file = "test_arrow_point_away.diag"
+        with open(test_file, "w") as f:
+            f.write("Rectangle(cause) connects to(point away) horizontal Triangle(effect)")
+        
+        try:
+            reader = DiagReader()
+            ascii_art = reader.render_ascii(test_file)
+            # Expected: horizontal connection with arrow pointing right (away from cause to effect)
+            expected = "┌───────┐             /\\\n│ cause │────────>   /  \\\n└───────┘           /    \\\n                   /effect\\\n                  /________\\"
+            self.assertEqual(ascii_art, expected)
+        finally:
+            if os.path.exists(test_file):
+                os.remove(test_file)
+
+    def test_can_specify_arrow_types_horizontal_point_from(self):
+        test_file = "test_arrow_point_from.diag"
+        with open(test_file, "w") as f:
+            f.write("Rectangle(cause) connects to(point from) horizontal Triangle(effect)")
+        
+        try:
+            reader = DiagReader()
+            ascii_art = reader.render_ascii(test_file)
+            # Expected: horizontal connection with arrow pointing left (from effect back to cause)
+            expected = "┌───────┐             /\\\n│ cause │<────────   /  \\\n└───────┘           /    \\\n                   /effect\\\n                  /________\\"
+            self.assertEqual(ascii_art, expected)
+        finally:
+            if os.path.exists(test_file):
+                os.remove(test_file)
+
+    def test_can_specify_arrow_types_horizontal_double_point(self):
+        test_file = "test_arrow_double_point.diag"
+        with open(test_file, "w") as f:
+            f.write("Rectangle(cause) connects to(double point) horizontal Triangle(effect)")
+        
+        try:
+            reader = DiagReader()
+            ascii_art = reader.render_ascii(test_file)
+            # Expected: horizontal connection with arrows pointing both ways
+            expected = "┌───────┐            /\\\n│ cause │<──────>   /  \\\n└───────┘          /    \\\n                  /effect\\\n                 /________\\"
+            self.assertEqual(ascii_art, expected)
+        finally:
+            if os.path.exists(test_file):
+                os.remove(test_file)
+
+    def test_can_specify_arrow_types_vertical_point_away(self):
+        test_file = "test_arrow_vertical_point_away.diag"
+        with open(test_file, "w") as f:
+            f.write("Rectangle(cause) connects to(point away) vertical Triangle(effect)")
+        
+        try:
+            reader = DiagReader()
+            ascii_art = reader.render_ascii(test_file)
+            # Expected: vertical connection with arrow pointing down (away from cause to effect)
+            expected = " ┌───────┐\n │ cause │\n └───┬───┘\n     |\n     |\n     v\n    /\\\n   /  \\\n  /    \\\n /effect\\\n/________\\"
+            self.assertEqual(ascii_art, expected)
+        finally:
+            if os.path.exists(test_file):
+                os.remove(test_file)
+
+
+    def test_can_label_pointed_arrows_horizontal(self):
+        test_file = "test_labeled_arrow.diag"
+        with open(test_file, "w") as f:
+            f.write("Rectangle(cause) connects to(cases, point away) horizontal Triangle(effect)")
+        
+        try:
+            reader = DiagReader()
+            ascii_art = reader.render_ascii(test_file)
+            # Expected: horizontal connection with both label and arrow
+            expected = "┌───────┐                /\\\n│ cause │───cases───>   /  \\\n└───────┘              /    \\\n                      /effect\\\n                     /________\\"
+            self.assertEqual(ascii_art, expected)
+        finally:
+            if os.path.exists(test_file):
+                os.remove(test_file)
+
+    def test_can_label_pointed_arrows_vertical(self):
+        test_file = "test_labeled_arrow_vertical.diag"
+        with open(test_file, "w") as f:
+            f.write("Rectangle(cause) connects to(flows, point away) vertical Triangle(effect)")
+        
+        try:
+            reader = DiagReader()
+            ascii_art = reader.render_ascii(test_file)
+            # Expected: vertical connection with both label and arrow
+            expected = " ┌───────┐\n │ cause │\n └───┬───┘\n     |\n   flows\n     v\n    /\\\n   /  \\\n  /    \\\n /effect\\\n/________\\"
+            self.assertEqual(ascii_art, expected)
+        finally:
+            if os.path.exists(test_file):
+                os.remove(test_file)
+
+
 if __name__ == "__main__":
     unittest.main()
