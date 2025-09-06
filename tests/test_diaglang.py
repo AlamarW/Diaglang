@@ -163,6 +163,26 @@ class TestDiagReader(unittest.TestCase):
             if os.path.exists(test_file):
                 os.remove(test_file)
 
+    def test_cli_can_use_default_shape_flag(self):
+        import subprocess
+        test_file = "test_cli_default_shape.diag"
+        with open(test_file, "w") as f:
+            f.write("source connects to horizontal target")
+        
+        try:
+            result = subprocess.run(["python3", "src/main.py", "--default-shape", "rectangle", test_file], 
+                                  capture_output=True, text=True)
+            expected_content = result.stdout.strip()
+            # Should contain rectangle borders and both labels
+            self.assertIn("source", expected_content)
+            self.assertIn("target", expected_content)
+            self.assertIn("┌", expected_content)  # Rectangle top-left corner
+            self.assertIn("└", expected_content)  # Rectangle bottom-left corner
+            self.assertEqual(result.returncode, 0)
+        finally:
+            if os.path.exists(test_file):
+                os.remove(test_file)
+
     def test_rectangle_handles_short_label(self):
         test_file = "test_short_rect.diag"
         with open(test_file, "w") as f:
