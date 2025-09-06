@@ -111,32 +111,39 @@ class DiagramRenderer:
                 rendered_shapes.append(syntax_error)
                 continue
             
-            # Check if this is divergent connections first
-            divergent = self.divergent_connections.parse_divergent_connections(shape_input)
-            if divergent:
-                rendered_divergent = self.divergent_connections.render_divergent_connections(divergent)
-                if rendered_divergent:
-                    rendered_shapes.append(rendered_divergent)
+            # Check if this is convergent connections first
+            convergent = self.divergent_connections.parse_convergent_connections(shape_input)
+            if convergent:
+                rendered_convergent = self.divergent_connections.render_convergent_connections(convergent)
+                if rendered_convergent:
+                    rendered_shapes.append(rendered_convergent)
             else:
-                # Check if this is a chain
-                chain = self.chain_system.parse_chain(shape_input)
-                if chain:
-                    rendered_chain = self.chain_system.render_chain(chain)
-                    if rendered_chain:
-                        rendered_shapes.append(rendered_chain)
+                # Check if this is divergent connections  
+                divergent = self.divergent_connections.parse_divergent_connections(shape_input)
+                if divergent:
+                    rendered_divergent = self.divergent_connections.render_divergent_connections(divergent)
+                    if rendered_divergent:
+                        rendered_shapes.append(rendered_divergent)
                 else:
-                    # Check if this is a single connection
-                    connection = self.connection_system.parse_connection(shape_input)
-                    if connection:
-                        rendered_connection = self.connection_system.render_connection(
-                            connection["from"], connection["to"], connection["horizontal"], 
-                            connection["label"], connection.get("arrow_type")
-                        )
-                        if rendered_connection:
-                            rendered_shapes.append(rendered_connection)
+                    # Check if this is a chain
+                    chain = self.chain_system.parse_chain(shape_input)
+                    if chain:
+                        rendered_chain = self.chain_system.render_chain(chain)
+                        if rendered_chain:
+                            rendered_shapes.append(rendered_chain)
                     else:
-                        rendered_shape = self.shape_renderer.render_single_shape(shape_input)
-                        if rendered_shape:
-                            rendered_shapes.append(rendered_shape)
+                        # Check if this is a single connection
+                        connection = self.connection_system.parse_connection(shape_input)
+                        if connection:
+                            rendered_connection = self.connection_system.render_connection(
+                                connection["from"], connection["to"], connection["horizontal"], 
+                                connection["label"], connection.get("arrow_type")
+                            )
+                            if rendered_connection:
+                                rendered_shapes.append(rendered_connection)
+                        else:
+                            rendered_shape = self.shape_renderer.render_single_shape(shape_input)
+                            if rendered_shape:
+                                rendered_shapes.append(rendered_shape)
         
         return "\n\n".join(rendered_shapes)

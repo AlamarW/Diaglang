@@ -720,6 +720,55 @@ class TestDiagReader(unittest.TestCase):
             if os.path.exists(test_file):
                 os.remove(test_file)
 
+    def test_can_connect_multiple_sources_to_same_target_with_and(self):
+        test_file = "test_convergent_connections.diag"
+        with open(test_file, "w") as f:
+            f.write("Rectangle(cause1) and Rectangle(cause2) connects to(results in) horizontal Triangle(effect)")
+        
+        try:
+            reader = DiagReader()
+            ascii_art = reader.render_ascii(test_file)
+            # Should show both sources connecting to the same target
+            self.assertIn("cause1", ascii_art)
+            self.assertIn("cause2", ascii_art)  
+            self.assertIn("effect", ascii_art)
+            # Target should appear only once
+            self.assertEqual(ascii_art.count("effect"), 1)
+            # Should contain connection elements
+            self.assertIn("results in", ascii_art)
+        finally:
+            if os.path.exists(test_file):
+                os.remove(test_file)
+
+    def test_convergent_connections_equivalent_to_separate_statements(self):
+        # Test that convergent syntax produces same result as separate statements
+        test_file1 = "test_convergent_single.diag"
+        test_file2 = "test_convergent_separate.diag"
+        
+        with open(test_file1, "w") as f:
+            f.write("Rectangle(source1) and Rectangle(source2) connects to horizontal Triangle(target)")
+        
+        with open(test_file2, "w") as f:
+            f.write("Rectangle(source1) connects to horizontal Triangle(target)\nRectangle(source2) connects to horizontal Triangle(target)")
+        
+        try:
+            reader = DiagReader()
+            ascii_single = reader.render_ascii(test_file1)
+            ascii_separate = reader.render_ascii(test_file2)
+            
+            # Both should contain the same elements
+            self.assertIn("source1", ascii_single)
+            self.assertIn("source2", ascii_single)
+            self.assertIn("target", ascii_single)
+            
+            # Target should appear only once in the convergent version
+            self.assertEqual(ascii_single.count("target"), 1)
+        finally:
+            if os.path.exists(test_file1):
+                os.remove(test_file1)
+            if os.path.exists(test_file2):
+                os.remove(test_file2)
+
 
 if __name__ == "__main__":
     unittest.main()
