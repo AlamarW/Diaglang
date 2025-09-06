@@ -425,12 +425,11 @@ class TestDiagReader(unittest.TestCase):
         try:
             reader = DiagReader()
             ascii_art = reader.render_ascii(test_file)
-            # Should not create a connection, instead should render as invalid shape
-            # The text becomes a rectangle label since the connection syntax is invalid
-            self.assertIn("A) connects t", ascii_art)  # Truncated label in rectangle
-            # Should not contain connection elements (but avoid rectangle border chars)
-            self.assertNotIn("┬", ascii_art)  # No connection points
-            self.assertNotIn("label", ascii_art)  # No connection labels flowing between shapes
+            # Should now provide a helpful syntax error message
+            self.assertIn("SYNTAX ERROR", ascii_art)
+            self.assertIn("Missing direction", ascii_art)
+            self.assertIn("horizontal", ascii_art)
+            self.assertIn("vertical", ascii_art)
         finally:
             if os.path.exists(test_file):
                 os.remove(test_file)
@@ -645,6 +644,61 @@ class TestDiagReader(unittest.TestCase):
                 os.remove(test_file1)
             if os.path.exists(test_file2):
                 os.remove(test_file2)
+
+    def test_can_use_default_shape_flag_for_direct_labels(self):
+        test_file = "test_default_shape.diag"
+        with open(test_file, "w") as f:
+            f.write("cause connects to(causes, point away) horizontal effect")
+        
+        try:
+            reader = DiagReader()
+            ascii_art = reader.render_ascii(test_file, default_shape="rectangle")
+            # Should render as rectangles since that's the default shape
+            self.assertIn("cause", ascii_art)
+            self.assertIn("effect", ascii_art)
+            self.assertIn("causes", ascii_art)
+            self.assertIn("───>", ascii_art)  # Should have arrow pointing away
+            # Should have rectangle borders
+            self.assertIn("┌", ascii_art)
+            self.assertIn("└", ascii_art)
+        finally:
+            if os.path.exists(test_file):
+                os.remove(test_file)
+
+    def test_reports_syntax_errors_for_invalid_connection_syntax(self):
+        test_file = "test_syntax_error.diag"
+        with open(test_file, "w") as f:
+            f.write("Rectangle(A) connects to Triangle(B)")  # Missing direction
+        
+        try:
+            reader = DiagReader()
+            ascii_art = reader.render_ascii(test_file)
+            # Should contain error message instead of rendering
+            self.assertIn("SYNTAX ERROR", ascii_art)
+            self.assertIn("Missing direction", ascii_art)
+            self.assertIn("horizontal", ascii_art)
+            self.assertIn("vertical", ascii_art)
+        finally:
+            if os.path.exists(test_file):
+                os.remove(test_file)
+
+    def test_reports_syntax_errors_for_invalid_arrow_types(self):
+        test_file = "test_arrow_error.diag"
+        with open(test_file, "w") as f:
+            f.write("Rectangle(A) connects to(invalid arrow) horizontal Triangle(B)")
+        
+        try:
+            reader = DiagReader()
+            ascii_art = reader.render_ascii(test_file)
+            # Should contain error message for invalid arrow type
+            self.assertIn("SYNTAX ERROR", ascii_art)
+            self.assertIn("Invalid arrow type", ascii_art)
+            self.assertIn("point away", ascii_art)
+            self.assertIn("point from", ascii_art)
+            self.assertIn("double point", ascii_art)
+        finally:
+            if os.path.exists(test_file):
+                os.remove(test_file)
 
 
 if __name__ == "__main__":
