@@ -38,33 +38,44 @@ class DiagramRenderer:
         
         # First, let's handle connections with bare labels
         # Pattern: "label connects to" where label is not Shape(label)
-        pattern_from = r'\b([a-zA-Z_][a-zA-Z0-9_]*)\s+connects\s+to'
+        # Updated to handle multi-word labels (words and spaces, but not other syntax elements)
+        pattern_from = r'^([a-zA-Z_][a-zA-Z0-9_\s]*?)\s+connects\s+to'
         
         def replace_from_shape(match):
-            label = match.group(1)
+            label = match.group(1).strip()
             return f"{default_shape.capitalize()}({label}) connects to"
         
         result = re.sub(pattern_from, replace_from_shape, input_text)
         
         # Pattern: after direction keywords, find bare labels
         # Look for "horizontal label" or "vertical label" where label is not Shape(label)
-        pattern_to = r'\b(horizontal|vertical)\s+([a-zA-Z_][a-zA-Z0-9_]*)\b'
+        # Updated to handle multi-word labels at end of string
+        pattern_to = r'\b(horizontal|vertical)\s+([a-zA-Z_][a-zA-Z0-9_\s]*?)$'
         
         def replace_to_shape(match):
             direction = match.group(1)
-            label = match.group(2)
+            label = match.group(2).strip()
             return f"{direction} {default_shape.capitalize()}({label})"
             
         result = re.sub(pattern_to, replace_to_shape, result)
         
         # Handle "and" cases: "and label"
-        pattern_and = r'\band\s+([a-zA-Z_][a-zA-Z0-9_]*)\b'
+        # Updated to handle multi-word labels at end of string or before other keywords
+        pattern_and = r'\band\s+([a-zA-Z_][a-zA-Z0-9_\s]*?)(?=\s|$)'
         
         def replace_and_shape(match):
-            label = match.group(1)
+            label = match.group(1).strip()
             return f"and {default_shape.capitalize()}({label})"
             
         result = re.sub(pattern_and, replace_and_shape, result)
+        
+        # Handle standalone labels (entire string is just a label)
+        # This should only match if the string doesn't contain "connects to" or other syntax
+        if " connects to" not in result and not re.search(r'[(){}]', result):
+            # It's likely a standalone label
+            label = result.strip()
+            if label and re.match(r'^[a-zA-Z_][a-zA-Z0-9_\s]*$', label):
+                result = f"{default_shape.capitalize()}({label})"
         
         return result
     

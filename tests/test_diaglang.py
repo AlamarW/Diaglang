@@ -656,6 +656,42 @@ class TestDiagReader(unittest.TestCase):
             if os.path.exists(test_file):
                 os.remove(test_file)
 
+    def test_can_use_default_shape_with_spaced_labels_in_connections(self):
+        test_file = "test_default_shape_spaces.diag"
+        with open(test_file, "w") as f:
+            f.write("AI Agent connects to horizontal User Interface")
+        
+        try:
+            reader = DiagReader()
+            ascii_art = reader.render_ascii(test_file, default_shape="rectangle")
+            # Should render as rectangles with spaced labels
+            self.assertIn("AI Agent", ascii_art)
+            self.assertIn("User Interface", ascii_art)
+            # Should have rectangle borders
+            self.assertIn("┌", ascii_art)
+            self.assertIn("└", ascii_art)
+            self.assertIn("──────", ascii_art)  # Horizontal connection
+        finally:
+            if os.path.exists(test_file):
+                os.remove(test_file)
+
+    def test_can_use_default_shape_with_spaced_labels_standalone(self):
+        test_file = "test_default_shape_standalone_spaces.diag" 
+        with open(test_file, "w") as f:
+            f.write("AI Agent")
+        
+        try:
+            reader = DiagReader()
+            ascii_art = reader.render_ascii(test_file, default_shape="rectangle")
+            # Should render as rectangle with spaced label
+            self.assertIn("AI Agent", ascii_art)
+            # Should have rectangle borders
+            self.assertIn("┌", ascii_art)
+            self.assertIn("└", ascii_art)
+        finally:
+            if os.path.exists(test_file):
+                os.remove(test_file)
+
     def test_reports_syntax_errors_for_invalid_connection_syntax(self):
         test_file = "test_syntax_error.diag"
         with open(test_file, "w") as f:
