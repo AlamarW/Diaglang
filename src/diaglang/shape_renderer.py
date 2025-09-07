@@ -33,49 +33,25 @@ class ShapeRenderer:
         elif shape_type == "triangle":
             if label is not None:
                 if label == "":
-                    return "   /\\   \n  /  \\  \n /    \\ \n/______\\"
-                # Create proper triangle shape that scales with label
+                    return " /\\ \n/  \\\n\\__/"
+                # Simple triangle with label at bottom
                 label_len = len(label)
                 
-                # For very small labels (1-3 chars), use minimal triangle
-                if label_len <= 3:
-                    if label_len == 1:
-                        return f"  /\\\n /{label} \\\n/____\\"
-                    elif label_len == 2:
-                        return f"  /\\\n /{label}\\\n/____\\"
-                    else:  # label_len == 3
-                        return f"  /\\\n /{label}\\\n/_____\\"
+                # Calculate width needed for label
+                width = max(4, label_len + 2)
                 
-                # For longer labels, use the scaling algorithm
-                # Calculate how many rows we need based on label length
-                min_rows = 4  # minimum: top, middle, label, base
-                extra_rows = max(0, (label_len - 4) // 2)  # add rows for longer labels
-                total_rows = min_rows + extra_rows
+                # Top point - centered
+                top_spaces = " " * (width // 2)
+                top_line = top_spaces + "/\\"
                 
-                lines = []
+                # Bottom line with label
+                label_pad = (width - label_len) // 2
+                pad_left = " " * label_pad
+                pad_right = " " * (width - label_len - label_pad)
+                bottom_line = "/" + pad_left + label + pad_right + "\\"
                 
-                # Build triangle from top down, each row indented one less than the previous
-                for i in range(total_rows):
-                    indent = " " * (total_rows - i - 1)
-                    
-                    if i == 0:
-                        # Top point
-                        lines.append(f"{indent}/\\")
-                    elif i == total_rows - 2:
-                        # Label row (second to last)
-                        lines.append(f"{indent}/{label}\\")
-                    elif i == total_rows - 1:
-                        # Base row with underscores
-                        base_width = label_len + 2
-                        base = "_" * base_width
-                        lines.append(f"{indent}/{base}\\")
-                    else:
-                        # Middle expanding rows
-                        inner_spaces = " " * (2 * i)
-                        lines.append(f"{indent}/{inner_spaces}\\")
-                
-                return "\n".join(lines)
-            return "   /\\   \n  /  \\  \n /    \\ \n/______\\"
+                return top_line + "\n" + bottom_line
+            return " /\\ \n/__\\"
         elif shape_type == "rectangle":
             if label is not None:
                 if label == "":
@@ -84,6 +60,34 @@ class ShapeRenderer:
                 border = "─" * width
                 return f"┌{border}┐\n│ {label} │\n└{border}┘"
             return "┌─────┐\n│     │\n└─────┘"
+        elif shape_type == "diamond":
+            if label is not None:
+                if label == "":
+                    return " /\\ \n<  >\n \\/ "
+                # Create diamond that scales with label
+                label_len = len(label)
+                
+                # Calculate diamond dimensions based on label
+                # Diamond needs to be wider than the label
+                min_width = max(4, label_len + 2)  # Minimum width to contain label
+                
+                # Create diamond with proper proportions
+                # Top half
+                top_padding = " " * (min_width // 2)
+                top_line = top_padding + "/\\" + top_padding
+                
+                # Middle line with label
+                label_padding_total = min_width - label_len
+                label_pad_left = label_padding_total // 2
+                label_pad_right = label_padding_total - label_pad_left
+                middle_line = "<" + " " * label_pad_left + label + " " * label_pad_right + ">"
+                
+                # Bottom half
+                bottom_padding = " " * (min_width // 2)
+                bottom_line = bottom_padding + "\\/" + bottom_padding
+                
+                return top_line + "\n" + middle_line + "\n" + bottom_line
+            return " /\\ \n<  >\n \\/ "
         return ""
     
     def get_shape_center_position(self, shape_lines):

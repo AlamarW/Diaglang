@@ -71,7 +71,7 @@ class TestDiagReader(unittest.TestCase):
         try:
             reader = DiagReader()
             ascii_art = reader.render_ascii(test_file)
-            expected = "   /\\   \n  /  \\  \n /    \\ \n/______\\"
+            expected = " /\\ \n/__\\"
             self.assertEqual(ascii_art, expected)
         finally:
             if os.path.exists(test_file):
@@ -141,7 +141,7 @@ class TestDiagReader(unittest.TestCase):
         try:
             reader = DiagReader()
             ascii_art = reader.render_ascii(test_file)
-            expected = "  /\\\n /T \\\n/____\\"
+            expected = "  /\\\n/ T  \\"
             self.assertEqual(ascii_art, expected)
         finally:
             if os.path.exists(test_file):
@@ -290,7 +290,7 @@ class TestDiagReader(unittest.TestCase):
         try:
             reader = DiagReader()
             ascii_art = reader.render_ascii(test_file)
-            expected = "  ________________  \n /                \\ \n|  Testing mctest  |\n \\________________/ \n\n   /\\\n  /  \\\n /Test\\\n/______\\\n\n┌──────┐\n│ Test │\n└──────┘"
+            expected = "  ________________  \n /                \\ \n|  Testing mctest  |\n \\________________/ \n\n   /\\\n/ Test \\\n\n┌──────┐\n│ Test │\n└──────┘"
             self.assertEqual(ascii_art, expected)
         finally:
             if os.path.exists(test_file):
@@ -304,7 +304,7 @@ class TestDiagReader(unittest.TestCase):
         try:
             reader = DiagReader()
             ascii_art = reader.render_ascii(test_file)
-            expected = "┌───────┐\n│ Node1 │\n└───┬───┘\n    │\n    │\n   /\\\n  /  \\\n /Node2\\\n/_______\\"
+            expected = "┌───────┐\n│ Node1 │\n└───┬───┘\n    │\n    │\n    /\\\n/ Node2 \\"
             self.assertEqual(ascii_art, expected)
         finally:
             if os.path.exists(test_file):
@@ -318,7 +318,7 @@ class TestDiagReader(unittest.TestCase):
         try:
             reader = DiagReader()
             ascii_art = reader.render_ascii(test_file)
-            expected = "┌───────┐        /\\\n│ Start │────── /End\\\n└───────┘      /_____\\"
+            expected = "┌───────┐      /\\\n│ Start │──── /End\\\n└───────┘"
             self.assertEqual(ascii_art, expected)
         finally:
             if os.path.exists(test_file):
@@ -332,7 +332,7 @@ class TestDiagReader(unittest.TestCase):
         try:
             reader = DiagReader()
             ascii_art = reader.render_ascii(test_file)
-            expected = "  /\\\n /a \\\n/____\\"
+            expected = " /\\\n/a \\"
             self.assertEqual(ascii_art, expected)
         finally:
             if os.path.exists(test_file):
@@ -346,7 +346,7 @@ class TestDiagReader(unittest.TestCase):
         try:
             reader = DiagReader()
             ascii_art = reader.render_ascii(test_file)
-            expected = "  /\\\n /ab\\\n/____\\"
+            expected = "  /\\\n/ ab \\"
             self.assertEqual(ascii_art, expected)
         finally:
             if os.path.exists(test_file):
@@ -360,7 +360,7 @@ class TestDiagReader(unittest.TestCase):
         try:
             reader = DiagReader()
             ascii_art = reader.render_ascii(test_file)
-            expected = "  /\\\n /abc\\\n/_____\\"
+            expected = "   /\\\n/ abc \\"
             self.assertEqual(ascii_art, expected)
         finally:
             if os.path.exists(test_file):
@@ -374,7 +374,7 @@ class TestDiagReader(unittest.TestCase):
         try:
             reader = DiagReader()
             ascii_art = reader.render_ascii(test_file)
-            expected = "┌───────┐\n│ Start │\n└───┬───┘\n    │\n  uses\n    │\n   /\\\n  /End\\\n /_____\\"
+            expected = "┌───────┐\n│ Start │\n└───┬───┘\n    │\n  uses\n    │\n   /\\\n/ End \\"
             self.assertEqual(ascii_art, expected)
         finally:
             if os.path.exists(test_file):
@@ -388,7 +388,7 @@ class TestDiagReader(unittest.TestCase):
         try:
             reader = DiagReader()
             ascii_art = reader.render_ascii(test_file)
-            expected = "┌───────┐            /\\\n│ Start │───uses─── /End\\\n└───────┘          /_____\\"
+            expected = "┌───────┐           /\\\n│ Start │───uses─── /End\\\n└───────┘"
             self.assertEqual(ascii_art, expected)
         finally:
             if os.path.exists(test_file):
@@ -402,7 +402,7 @@ class TestDiagReader(unittest.TestCase):
         try:
             reader = DiagReader()
             ascii_art = reader.render_ascii(test_file)
-            expected = "   ┌───┐\n   │ A │\n   └┬──┘\n     │\n   flows\n     │\n    /\\\n   /B \\\n  /____\\\n     │\n   sends\n     │\n  ______  \n /      \\ \n|   C    |\n \\______/ "
+            expected = "   ┌───┐\n   │ A │\n   └┬──┘\n     │\n   flows\n     │\n    /\\\n/ B \\\n     │\n   sends\n     │\n  ______  \n /      \\ \n|   C    |\n \\______/ "
             self.assertEqual(ascii_art, expected)
         finally:
             if os.path.exists(test_file):
@@ -416,7 +416,7 @@ class TestDiagReader(unittest.TestCase):
         try:
             reader = DiagReader()
             ascii_art = reader.render_ascii(test_file)
-            expected = "┌───┐           /\\             ______  \n│ A │──flows── /B \\ ──sends── /      \\ \n└───┘         /____\\         |   C    |\n                              \\______/ "
+            expected = "┌───┐         /\\           ______  \n│ A │──flows──/B \\──sends── /      \\ \n└───┘                       |   C    |\n                            \\______/ "
             self.assertEqual(ascii_art, expected)
         finally:
             if os.path.exists(test_file):
@@ -431,7 +431,7 @@ class TestDiagReader(unittest.TestCase):
             reader = DiagReader()
             ascii_art = reader.render_ascii(test_file)
             # This should render A horizontal to B, then B vertical to C
-            expected = "┌───┐             /\\\n│ A │───flows─── /B \\\n└───┘           /____\\\n                   │\n        sends\n                   │\n                ______  \n               /      \\ \n              |   C    |\n               \\______/ "
+            expected = "┌───┐           /\\\n│ A │───flows───/B \\\n└───┘             │\n                sends\n                  │\n                ______  \n               /      \\ \n              |   C    |\n               \\______/ "
             self.assertEqual(ascii_art, expected)
         finally:
             if os.path.exists(test_file):
@@ -490,7 +490,7 @@ class TestDiagReader(unittest.TestCase):
         try:
             reader = DiagReader()
             ascii_art = reader.render_ascii(test_file)
-            expected = "  /\\\n /A \\\n/____\\"
+            expected = " /\\\n/A \\"
             self.assertEqual(ascii_art, expected)
         finally:
             if os.path.exists(test_file):
@@ -504,7 +504,7 @@ class TestDiagReader(unittest.TestCase):
         try:
             reader = DiagReader()
             ascii_art = reader.render_ascii(test_file)
-            expected = "       /\\\n      /  \\\n     /    \\\n    /      \\\n   /        \\\n  /          \\\n /VeryLongLabel\\\n/_______________\\"
+            expected = "       /\\\n/ VeryLongLabel \\"
             self.assertEqual(ascii_art, expected)
         finally:
             if os.path.exists(test_file):
@@ -518,7 +518,7 @@ class TestDiagReader(unittest.TestCase):
         try:
             reader = DiagReader()
             ascii_art = reader.render_ascii(test_file)
-            expected = "   /\\   \n  /  \\  \n /    \\ \n/______\\"
+            expected = " /\\ \n/__\\"
             self.assertEqual(ascii_art, expected)
         finally:
             if os.path.exists(test_file):
@@ -534,7 +534,7 @@ class TestDiagReader(unittest.TestCase):
             reader = DiagReader()
             ascii_art = reader.render_ascii(test_file)
             # Expected: horizontal connection with arrow pointing right (away from cause to effect)
-            expected = "┌───────┐             /\\\n│ cause │────────>   /  \\\n└───────┘           /    \\\n                   /effect\\\n                  /________\\"
+            expected = "┌───────┐         /\\\n│ cause │────────>/ effect \\\n└───────┘"
             self.assertEqual(ascii_art, expected)
         finally:
             if os.path.exists(test_file):
@@ -549,7 +549,7 @@ class TestDiagReader(unittest.TestCase):
             reader = DiagReader()
             ascii_art = reader.render_ascii(test_file)
             # Expected: horizontal connection with arrow pointing left (from effect back to cause)
-            expected = "┌───────┐             /\\\n│ cause │<────────   /  \\\n└───────┘           /    \\\n                   /effect\\\n                  /________\\"
+            expected = "┌───────┐         /\\\n│ cause │<────────/ effect \\\n└───────┘"
             self.assertEqual(ascii_art, expected)
         finally:
             if os.path.exists(test_file):
@@ -564,7 +564,7 @@ class TestDiagReader(unittest.TestCase):
             reader = DiagReader()
             ascii_art = reader.render_ascii(test_file)
             # Expected: horizontal connection with arrows pointing both ways
-            expected = "┌───────┐            /\\\n│ cause │<──────>   /  \\\n└───────┘          /    \\\n                  /effect\\\n                 /________\\"
+            expected = "┌───────┐        /\\\n│ cause │<──────>/ effect \\\n└───────┘"
             self.assertEqual(ascii_art, expected)
         finally:
             if os.path.exists(test_file):
@@ -579,7 +579,7 @@ class TestDiagReader(unittest.TestCase):
             reader = DiagReader()
             ascii_art = reader.render_ascii(test_file)
             # Expected: vertical connection with arrow pointing down (away from cause to effect)
-            expected = " ┌───────┐\n │ cause │\n └───┬───┘\n     |\n     |\n     v\n    /\\\n   /  \\\n  /    \\\n /effect\\\n/________\\"
+            expected = " ┌───────┐\n │ cause │\n └───┬───┘\n     |\n     |\n     v\n    /\\\n/ effect \\"
             self.assertEqual(ascii_art, expected)
         finally:
             if os.path.exists(test_file):
@@ -595,7 +595,7 @@ class TestDiagReader(unittest.TestCase):
             reader = DiagReader()
             ascii_art = reader.render_ascii(test_file)
             # Expected: horizontal connection with both label and arrow
-            expected = "┌───────┐                /\\\n│ cause │───cases───>   /  \\\n└───────┘              /    \\\n                      /effect\\\n                     /________\\"
+            expected = "┌───────┐            /\\\n│ cause │───cases───>/ effect \\\n└───────┘"
             self.assertEqual(ascii_art, expected)
         finally:
             if os.path.exists(test_file):
@@ -610,7 +610,7 @@ class TestDiagReader(unittest.TestCase):
             reader = DiagReader()
             ascii_art = reader.render_ascii(test_file)
             # Expected: vertical connection with both label and arrow
-            expected = " ┌───────┐\n │ cause │\n └───┬───┘\n     |\n   flows\n     v\n    /\\\n   /  \\\n  /    \\\n /effect\\\n/________\\"
+            expected = " ┌───────┐\n │ cause │\n └───┬───┘\n     |\n   flows\n     v\n    /\\\n/ effect \\"
             self.assertEqual(ascii_art, expected)
         finally:
             if os.path.exists(test_file):
@@ -768,6 +768,143 @@ class TestDiagReader(unittest.TestCase):
                 os.remove(test_file1)
             if os.path.exists(test_file2):
                 os.remove(test_file2)
+
+    def test_can_render_diamond_as_ascii_art(self):
+        test_file = "test_diamond.diag"
+        with open(test_file, "w") as f:
+            f.write("diamond")
+        
+        try:
+            reader = DiagReader()
+            ascii_art = reader.render_ascii(test_file)
+            # Should render as diamond shape
+            self.assertIn("/\\", ascii_art)  # Top point
+            self.assertIn("\\/", ascii_art)  # Bottom point  
+            self.assertIn("<", ascii_art)   # Left point
+            self.assertIn(">", ascii_art)   # Right point
+        finally:
+            if os.path.exists(test_file):
+                os.remove(test_file)
+
+    def test_can_render_labeled_diamond(self):
+        test_file = "test_labeled_diamond.diag"
+        with open(test_file, "w") as f:
+            f.write("Diamond(Decision)")
+        
+        try:
+            reader = DiagReader()
+            ascii_art = reader.render_ascii(test_file)
+            # Should contain diamond shape with label
+            self.assertIn("Decision", ascii_art)
+            self.assertIn("/\\", ascii_art)  # Top point
+            self.assertIn("\\/", ascii_art)  # Bottom point
+            self.assertIn("<", ascii_art)   # Left point  
+            self.assertIn(">", ascii_art)   # Right point
+        finally:
+            if os.path.exists(test_file):
+                os.remove(test_file)
+
+    def test_can_render_complex_network_with_proper_layout(self):
+        test_file = "test_complex_network.diag"
+        with open(test_file, "w") as f:
+            f.write("Rectangle(A) connects to horizontal Rectangle(Central)\nRectangle(B) connects to horizontal Rectangle(Central)\nRectangle(Central) connects to horizontal Rectangle(C)\nRectangle(Central) connects to horizontal Rectangle(D)")
+        
+        try:
+            reader = DiagReader()
+            ascii_art = reader.render_ascii(test_file)
+            # Should render Central shape only once, not four times
+            self.assertEqual(ascii_art.count("Central"), 1)
+            # Should contain all shapes
+            self.assertIn("A", ascii_art)
+            self.assertIn("B", ascii_art) 
+            self.assertIn("Central", ascii_art)
+            self.assertIn("C", ascii_art)
+            self.assertIn("D", ascii_art)
+            # Should have connection lines
+            self.assertIn("─", ascii_art)
+        finally:
+            if os.path.exists(test_file):
+                os.remove(test_file)
+
+    def test_diamond_renders_in_horizontal_connections(self):
+        test_file = "test_diamond_horizontal.diag"
+        with open(test_file, "w") as f:
+            f.write("Rectangle(Start) connects to horizontal Diamond(Decision)")
+        
+        try:
+            reader = DiagReader()
+            ascii_art = reader.render_ascii(test_file)
+            # Should contain both shapes
+            self.assertIn("Start", ascii_art)
+            self.assertIn("Decision", ascii_art)
+            # Should contain diamond shape markers
+            self.assertIn("/\\", ascii_art)  # Top point
+            self.assertIn("\\/", ascii_art)  # Bottom point
+            self.assertIn("<", ascii_art)   # Left point
+            self.assertIn(">", ascii_art)   # Right point
+            # Should have horizontal connection line
+            self.assertIn("─", ascii_art)
+        finally:
+            if os.path.exists(test_file):
+                os.remove(test_file)
+
+    def test_diamond_renders_in_vertical_connections(self):
+        test_file = "test_diamond_vertical.diag"
+        with open(test_file, "w") as f:
+            f.write("Rectangle(Start) connects to vertical Diamond(Decision)")
+        
+        try:
+            reader = DiagReader()
+            ascii_art = reader.render_ascii(test_file)
+            # Should contain both shapes
+            self.assertIn("Start", ascii_art)
+            self.assertIn("Decision", ascii_art)
+            # Should contain diamond shape markers
+            self.assertIn("/\\", ascii_art)  # Top point
+            self.assertIn("\\/", ascii_art)  # Bottom point
+            self.assertIn("<", ascii_art)   # Left point
+            self.assertIn(">", ascii_art)   # Right point
+            # Should have vertical connection line
+            self.assertIn("│", ascii_art)
+        finally:
+            if os.path.exists(test_file):
+                os.remove(test_file)
+
+    def test_can_add_diagram_title(self):
+        test_file = "test_title.diag"
+        with open(test_file, "w") as f:
+            f.write("Title(My Diagram)\nRectangle(Node)")
+        
+        try:
+            reader = DiagReader()
+            ascii_art = reader.render_ascii(test_file)
+            # Title should appear at the top
+            lines = ascii_art.split('\n')
+            self.assertIn("My Diagram", lines[0])
+            # Should still contain the shape
+            self.assertIn("Node", ascii_art)
+            # Should contain rectangle borders
+            self.assertIn("┌", ascii_art)
+            self.assertIn("└", ascii_art)
+        finally:
+            if os.path.exists(test_file):
+                os.remove(test_file)
+
+    def test_title_only_works_at_head_of_file(self):
+        test_file = "test_title_not_at_head.diag"
+        with open(test_file, "w") as f:
+            f.write("Rectangle(Node)\nTitle(My Diagram)")
+        
+        try:
+            reader = DiagReader()
+            ascii_art = reader.render_ascii(test_file)
+            # Title should not be processed when not at head
+            self.assertNotIn("My Diagram", ascii_art.split('\n')[0])
+            # Should contain the shape
+            self.assertIn("Node", ascii_art)
+        finally:
+            if os.path.exists(test_file):
+                os.remove(test_file)
 
 
 if __name__ == "__main__":

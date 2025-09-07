@@ -3,6 +3,7 @@ from .shape_renderer import ShapeRenderer
 from .connection_system import ConnectionSystem
 from .chain_system import ChainSystem
 from .divergent_connections import DivergentConnections
+from .network_system import NetworkSystem
 
 
 class DiagramRenderer:
@@ -12,6 +13,7 @@ class DiagramRenderer:
         self.connection_system = ConnectionSystem()
         self.chain_system = ChainSystem()
         self.divergent_connections = DivergentConnections()
+        self.network_system = NetworkSystem(self.shape_renderer, self.connection_system)
     
     # Expose file operations methods for backward compatibility with tests
     def read_file(self, filename):
@@ -99,11 +101,44 @@ class DiagramRenderer:
         if not shapes:
             return ""
         
-        rendered_shapes = []
-        for shape_input in shapes:
-            # Apply default shape transformation if specified
+        # Check if first line is a title and extract it
+        title = None
+        diagram_shapes = shapes
+        
+        if shapes and shapes[0].strip().startswith('Title(') and shapes[0].strip().endswith(')'):
+            title_line = shapes[0].strip()
+            title = title_line[6:-1]  # Extract text between Title( and )
+            diagram_shapes = shapes[1:]  # Rest of the shapes
+        
+        if not diagram_shapes:
+            # Only title, no shapes
+            return title if title else ""
+        
+        # Apply default shape transformation to all shapes first
+        processed_shapes = []
+        for shape_input in diagram_shapes:
             if default_shape:
                 shape_input = self._apply_default_shape(shape_input, default_shape)
+            processed_shapes.append(shape_input)
+        
+        # Check if this looks like a complex network (multiple connections with shared nodes that have both incoming and outgoing)
+        connection_count = sum(1 for shape in processed_shapes if ' connects to ' in shape)
+        if connection_count > 1:
+            # Try to detect if there are nodes with both incoming and outgoing connections
+            network = self.network_system.parse_network(processed_shapes)
+            complex_nodes = [name for name, node in network['nodes'].items() 
+                           if node['incoming'] and node['outgoing']]
+            
+            if complex_nodes:
+                # This is a complex network, use network system
+                diagram_content = self.network_system.render_network(network)
+                if title:
+                    return title + '\n\n' + diagram_content
+                return diagram_content
+        
+        # Fall back to original per-shape rendering
+        rendered_shapes = []
+        for shape_input in processed_shapes:
             
             # Validate syntax first
             syntax_error = self._validate_syntax(shape_input)
@@ -146,4 +181,7 @@ class DiagramRenderer:
                             if rendered_shape:
                                 rendered_shapes.append(rendered_shape)
         
-        return "\n\n".join(rendered_shapes)
+        diagram_content = "\n\n".join(rendered_shapes)
+        if title:
+            return title + '\n\n' + diagram_content
+        return diagram_content

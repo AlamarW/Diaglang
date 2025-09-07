@@ -12,7 +12,7 @@ if __name__ == "__main__":
     parser.add_argument("filename", help="Path to .diag file to render")
     parser.add_argument(
         "--default-shape", 
-        choices=["rectangle", "square", "circle", "triangle"],
+        choices=["rectangle", "square", "circle", "triangle", "diamond"],
         help="Default shape type for bare labels (enables simplified syntax)"
     )
     
