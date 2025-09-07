@@ -1,0 +1,2 @@
+Title(Test)
+Rectangle(Bob) connects to(test, point away) horizontal Rectangle(John) and Rectangle(John) connects to(test, point away) horizontal Rectangle(Steve)

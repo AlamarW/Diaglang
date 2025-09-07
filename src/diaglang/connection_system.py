@@ -32,11 +32,11 @@ class ConnectionSystem:
                 parts = paren_content.split(",", 1)
                 connection_label = parts[0].strip()
                 potential_arrow_type = parts[1].strip()
-                if potential_arrow_type in ["point away", "point from", "double point"]:
+                if potential_arrow_type in ["point to", "point back", "double point"]:
                     arrow_type = potential_arrow_type
             else:
                 # Single content - check if it's an arrow type or regular label
-                if paren_content in ["point away", "point from", "double point"]:
+                if paren_content in ["point to", "point back", "double point"]:
                     arrow_type = paren_content
                 else:
                     connection_label = paren_content
@@ -109,9 +109,9 @@ class ConnectionSystem:
             # Handle both label and vertical arrow type
             label_padding = max(0, (connection_center * 2 + 1 - len(label)) // 2)
             label_line = ' ' * label_padding + label
-            if arrow_type == "point away":
+            if arrow_type == "point to":
                 connection_lines = [connection_indent + '|', label_line, connection_indent + 'v']
-            elif arrow_type == "point from":
+            elif arrow_type == "point back":
                 connection_lines = [connection_indent + '^', label_line, connection_indent + '|']
             elif arrow_type == "double point":
                 connection_lines = [connection_indent + '^', label_line, connection_indent + 'v']
@@ -119,9 +119,9 @@ class ConnectionSystem:
                 connection_lines = [connection_indent + '│', label_line, connection_indent + '│']  # fallback
         elif arrow_type:
             # Handle vertical arrow types only
-            if arrow_type == "point away":
+            if arrow_type == "point to":
                 connection_lines = [connection_indent + '|', connection_indent + '|', connection_indent + 'v']
-            elif arrow_type == "point from":
+            elif arrow_type == "point back":
                 connection_lines = [connection_indent + '^', connection_indent + '|', connection_indent + '|']
             elif arrow_type == "double point":
                 connection_lines = [connection_indent + '^', connection_indent + '|', connection_indent + 'v']
@@ -165,9 +165,9 @@ class ConnectionSystem:
         if arrow_type and label:
             # Handle both label and arrow type: ───label───>
             dash_count = 3  # dashes on each side of label
-            if arrow_type == "point away":
+            if arrow_type == "point to":
                 connection_line = '─' * dash_count + label + '─' * dash_count + '>'
-            elif arrow_type == "point from":
+            elif arrow_type == "point back":
                 connection_line = '<' + '─' * dash_count + label + '─' * dash_count
             elif arrow_type == "double point":
                 connection_line = '<' + '─' * dash_count + label + '─' * dash_count + '>'
@@ -176,9 +176,9 @@ class ConnectionSystem:
             connection_length = len(connection_line)
         elif arrow_type:
             # Handle arrow types only
-            if arrow_type == "point away":
+            if arrow_type == "point to":
                 connection_line = "────────>"
-            elif arrow_type == "point from":
+            elif arrow_type == "point back":
                 connection_line = "<────────"
             elif arrow_type == "double point":
                 connection_line = "<──────>"

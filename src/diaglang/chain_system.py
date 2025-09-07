@@ -51,11 +51,11 @@ class ChainSystem:
                     parts = paren_content.split(",", 1)
                     connection_label = parts[0].strip()
                     potential_arrow_type = parts[1].strip()
-                    if potential_arrow_type in ["point away", "point from", "double point"]:
+                    if potential_arrow_type in ["point to", "point back", "double point"]:
                         arrow_type = potential_arrow_type
                 else:
                     # Single content - check if it's an arrow type or regular label
-                    if paren_content in ["point away", "point from", "double point"]:
+                    if paren_content in ["point to", "point back", "double point"]:
                         arrow_type = paren_content
                     else:
                         connection_label = paren_content
@@ -256,9 +256,9 @@ class ChainSystem:
                         if conn.get("arrow_type") and conn.get("label"):
                             # Handle both label and arrow type: ───label───>
                             dash_count = 3
-                            if conn["arrow_type"] == "point away":
+                            if conn["arrow_type"] == "point to":
                                 connection = '─' * dash_count + conn["label"] + '─' * dash_count + '>'
-                            elif conn["arrow_type"] == "point from":
+                            elif conn["arrow_type"] == "point back":
                                 connection = '<' + '─' * dash_count + conn["label"] + '─' * dash_count
                             elif conn["arrow_type"] == "double point":
                                 connection = '<' + '─' * dash_count + conn["label"] + '─' * dash_count + '>'
@@ -266,9 +266,9 @@ class ChainSystem:
                                 connection = '─' * dash_count + conn["label"] + '─' * dash_count  # fallback
                         elif conn.get("arrow_type"):
                             # Handle arrow types only
-                            if conn["arrow_type"] == "point away":
+                            if conn["arrow_type"] == "point to":
                                 connection = "────────>"
-                            elif conn["arrow_type"] == "point from":
+                            elif conn["arrow_type"] == "point back":
                                 connection = "<────────"
                             elif conn["arrow_type"] == "double point":
                                 connection = "<──────>"

@@ -1,0 +1,3 @@
+Title(Workflow)
+Rectangle(AI Agent) connects to(reads, point away) horizontal Rectangle(Claude.md File) and Rectangle(Plan.md File) 
+Rectangle(Plan.md File) and Rectangle(Claude.md File) connects to(specifies, point away) vertical Rectangle(Intent)

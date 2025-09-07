@@ -86,13 +86,13 @@ class DiagramRenderer:
                 
                 # If there's a comma, the second part should be the arrow type
                 if second_part:
-                    if second_part not in ["point away", "point from", "double point"]:
-                        return f"SYNTAX ERROR in '{shape_input}'\nInvalid arrow type: '{second_part}'\nValid arrow types: 'point away', 'point from', 'double point'"
+                    if second_part not in ["point to", "point back", "double point"]:
+                        return f"SYNTAX ERROR in '{shape_input}'\nInvalid arrow type: '{second_part}'\nValid arrow types: 'point to', 'point back', 'double point'"
                 # If no comma, check if the first part looks like it's trying to be an arrow type
                 elif first_part and (" arrow" in first_part or "point" in first_part):
                     # This looks like it's trying to be an arrow type - validate it
-                    if first_part not in ["point away", "point from", "double point"]:
-                        return f"SYNTAX ERROR in '{shape_input}'\nInvalid arrow type: '{first_part}'\nValid arrow types: 'point away', 'point from', 'double point'"
+                    if first_part not in ["point to", "point back", "double point"]:
+                        return f"SYNTAX ERROR in '{shape_input}'\nInvalid arrow type: '{first_part}'\nValid arrow types: 'point to', 'point back', 'double point'"
         
         return None
     
